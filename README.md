@@ -1,6 +1,6 @@
 # Kai Content Agent
 
-Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案和 P3 视频渲染。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
+Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染及 P4 品牌视觉。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
 
 ## Windows 环境
 
@@ -85,25 +85,32 @@ P2 校验以 `edit_plan.json` 所在目录为基准，核对 `original_transcrip
 
 Gemini 审核由用户明确授权共享后生成本地审核包，并由用户手动提交和取回回复。Codex 依据原文逐条记录是否采纳及原因。可选审核不影响生产计划的生成，模拟导入使用 `--origin simulated`。实际工作流与草稿字段见 Skill，审核材料见 [P2 审核文本](P2-REVIEW.txt)。
 
-## 渲染推荐片段
+## 品牌视觉与渲染
 
-在项目根目录运行 CLI，或在 Codex 使用 [`$kai-render`](.agents/skills/kai-render/SKILL.md) 并指定任务和分析版本。Windows 上使用支持 libass 的 FFmpeg，字幕模板使用 Microsoft YaHei。默认以 `h264_nvenc` 输出，CPU 备用需显式指定 `--encoder libx264`。
+在项目根目录运行 CLI，或在 Codex 使用 [`$kai-design`](.agents/skills/kai-design/SKILL.md) 和 [`$kai-render`](.agents/skills/kai-render/SKILL.md)。[品牌配置](config/kai-brand.json) 管理颜色、字体、行高和区域，默认使用 Windows 本机微软雅黑和 Arial、支持 libass 的 FFmpeg、`h264_nvenc` 编码。CPU 备用为 `--encoder libx264`。
 
 ```powershell
-.\.venv\Scripts\python.exe src/render.py 'workspace/p3-real-chain' --version 1 --output 'output/p3-next'
-ffmpeg -v error -xerror -nostdin -i 'output/p3-next/video.mp4' -map 0:v:0 -map 0:a:0 -f null NUL
+$conclusion = '同类工单总人工耗时连续几天没降，就暂停扩大试点。'
+.\.venv\Scripts\python.exe src/render.py 'workspace/p3-real-chain' --output 'output/kai-preview' --preview-only --conclusion $conclusion
+.\.venv\Scripts\python.exe src/render.py 'workspace/p3-real-chain' --output 'output/kai-next' --conclusion $conclusion
+ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 0:a:0 -f null NUL
 ```
 
 - `--version 1` 对应 `analysis/`，`--version 2` 对应 `analysis-v2/`。CLI 复用 P2 校验。素材不可访问、授权不足、无推荐片段或输出目录已存在时会报错。
-- 默认 `--mode full`，先呈现原始片段，再显示标明「原创解读」的静音文字卡。使用 `--mode interview-preview` 仅生成带「访谈预览」标识的主体。音频源使用标明「无源画面」的文字卡。
-- 成品为 1080×1920、30 fps、H.264/AAC MP4。画面等比例缩放。渲染按源播放零点换算解码 PTS，使用 P1 指定的原始音轨。视频边界对齐到 30 fps 帧格，原始音频精确裁到计划边界。
-- 英文素材使用 P2 中文译文为主、P1 英文原文为辅。中文素材使用 P1 原文。需要拆页时优先用可对应的 P1 词时点，否则在时间轴记录估算。可同屏放下的完整译文会继续显示。超长译文自身分页时，时间轴也会标明段内对齐为估算。
+- `--brand` 可读取自定义品牌 JSON。默认 `--crop fit` 按素材显示比例选择横屏或竖屏区域并保留完整画面。`--crop center-crop` 为显式中心裁切，需检查边缘内容。文字区域采用可配置的保守平台留边，客户端遮挡待实测。
+- 成品为 1080×1920、30 fps、H.264/AAC MP4。渲染按源播放零点换算 PTS，使用 P1 指定的音轨。视频边界对齐到帧，原始音频精确裁到计划边界。
+- 英文素材显示 P2 中文译文和 P1 原文，中文素材显示 P1 原文。以 P1 段落时间同时呈现完整双语，优先按标点和单词换行，两行放不下时保留全段并记录例外。时间轴提供阅读速度估算。
+- 默认 `--mode full`。约 3–6 秒可读完的完整观点或显式 `--conclusion` 显示为「原创结论」。解读超出时长且未提供配音时标为「待完善草稿」。`--mode interview-preview` 为访谈预览，`--mode long-text-preview` 为静音长文技术预览。
+- 提供本人或已授权的解读音频时，用 `--voiceover audio.wav --voiceover-cues cues.json`。UTF-8 JSON 格式如 `[{"start_ms":0,"end_ms":2000,"text":"第一条配音字幕。"}]`，时间相对于解读音频，区间需按顺序排列且不重叠。
+- 封面默认取推荐片段约三分之一处的源帧。`--cover-time-ms` 接收源播放毫秒，`--cover-title-en` 接收英文副标题。用 `--preview-only` 生成静态版面、封面和辅助文件。
 
 | 文件 | 内容 |
 | --- | --- |
 | `video.mp4` | 烧录字幕的成品或访谈预览 |
+| `cover.png` / `cover-3x4.png` | 1080×1920 封面及中央 1080×1440 裁切 |
 | `subtitles.ass` | 独立可查的字幕、标题和文字卡 |
 | `timeline.json` | 成品字幕毫秒、计时依据和原创解读帧边界 |
-| `render_manifest.json` | 当前原始文件的 SHA-256、P2 版本及计划身份、源与成品时间、编码、耗时和人工审核状态 |
+| `render_manifest.json` | 素材和配置身份、构图、时间轴、编码、解读、封面来源和人工审核状态 |
+| `frame-*.png` | 正片抽帧，或在静态模式下用同一布局生成的预览 |
 
-原始媒体 SHA-256 从本次实际渲染输入计算，此后可用于比对同一素材。成品保持人工审核待确认。审核时需实际播放并检查原意、画面、字幕和 AI 标识。P3 实测及实现见 [P3 审核文本](P3-REVIEW.txt)。
+原始媒体 SHA-256 从本次实际渲染输入计算。人工审核时播放视频并检查原意、画面、字幕、原创观点及 AI 标识。P4 运行证据见 [P4 审核文本](P4-REVIEW.txt)。

@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "template": "kai-black-gold",
+  "colors": {
+    "background": "#101010",
+    "accent": "#E5C88E",
+    "primary": "#F5F5F5",
+    "secondary": "#A1A1AA"
+  },
+  "platform_ui_reserve": {"left": 56, "top": 136, "right": 112, "bottom": 224},
+  "styles": {
+    "Brand": {"font": "Microsoft YaHei", "size": 31, "line_height": 45, "width_factor": 0.82, "bold": true, "color": "accent"},
+    "Title": {"font": "Microsoft YaHei", "size": 66, "line_height": 81, "width_factor": 0.82, "bold": true, "color": "primary"},
+    "Chinese": {"font": "Microsoft YaHei", "size": 50, "line_height": 63, "width_factor": 0.82, "bold": true, "color": "primary"},
+    "Original": {"font": "Arial", "size": 42, "line_height": 53, "width_factor": 0.78, "bold": false, "color": "secondary"},
+    "CardLabel": {"font": "Microsoft YaHei", "size": 38, "line_height": 54, "width_factor": 0.82, "bold": true, "color": "accent"},
+    "CardText": {"font": "Microsoft YaHei", "size": 63, "line_height": 80, "width_factor": 0.82, "bold": true, "color": "primary"},
+    "CoverTitle": {"font": "Microsoft YaHei", "size": 83, "line_height": 102, "width_factor": 0.82, "bold": true, "color": "primary"},
+    "CoverEnglish": {"font": "Arial", "size": 43, "line_height": 56, "width_factor": 0.78, "bold": false, "color": "secondary"}
+  },
+  "brand": {"x": 72, "y": 147, "w": 888, "h": 57},
+  "title": {"x": 72, "y": 228, "w": 888, "h": 156},
+  "landscape": {
+    "video": {"x": 28, "y": 408, "w": 1024, "h": 650},
+    "subtitles": {"x": 72, "y": 1115, "w": 888, "h": 410}
+  },
+  "portrait": {
+    "video": {"x": 56, "y": 390, "w": 912, "h": 892},
+    "subtitles": {"x": 72, "y": 1330, "w": 888, "h": 350}
+  },
+  "commentary": {
+    "label": {"x": 72, "y": 597, "w": 888, "h": 80},
+    "text": {"x": 72, "y": 703, "w": 888, "h": 580}
+  },
+  "cover": {
+    "brand": {"x": 72, "y": 319, "w": 936, "h": 57},
+    "title": {"x": 72, "y": 420, "w": 936, "h": 224},
+    "english": {"x": 72, "y": 661, "w": 936, "h": 115},
+    "video": {"x": 28, "y": 798, "w": 1024, "h": 704}
+  },
+  "rule": {"length": 88, "thickness": 3, "gap": 8},
+  "subtitle_language_gap": 19
+}

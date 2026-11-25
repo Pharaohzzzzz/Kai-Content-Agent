@@ -1,0 +1,47 @@
+Kai Content Agent · P4 REVIEW · AWAITING_GPT_REVIEW
+2026-11-26（Asia/Shanghai）
+
+范围与实现
+Kai Visual System V1.0 应用于正片、静态预览和封面。横竖屏默认等比保留源画面，可显式中心裁切。Windows 本机微软雅黑和 Arial 分别用于中文和英文。配置含标题、字幕、品牌、主画面、原创解读、保守平台留边及封面；无新增依赖。
+
+变更文件
+config/kai-brand.json
+src/render.py, src/render_brand.py, src/render_subtitles.py, src/render_commentary.py
+.agents/skills/kai-design/SKILL.md, .agents/skills/kai-render/SKILL.md
+README.md, STATUS.md, P4-REVIEW.txt
+
+品牌配置与同源对比
+模板 kai-black-gold 1.0。背景 #101010，强调 #E5C88E，主文字 #F5F5F5，辅助 #A1A1AA。
+配置 SHA-256 为 39c1da7dd6996ec4f591e5b95f8daf5b65e49eb5d2a10e8b3d097dc9b94ca011。
+同源 ai-support-net-time，源播放 2350–48290 ms、音轨 2、画面流 0、主体 1379 帧。
+P3 总长 69.966667 秒，渲染 6.410 秒，总生产 6.515 秒，约 900×506 的源画面，24.000 秒原创文字卡。
+P4 总长 50.800 秒，渲染 5.040 秒，总生产 5.798 秒，1024×576 的源画面，4.833 秒原创结论。标题、品牌标识及双语字幕分区。完整解码通过，末尾静音约 5.049 秒，包含原声尾端停顿。前 45.930 秒解码 PCM 与 P3 逐字节相同。
+
+字幕与原创解读
+8 个段落保留 P3 的段首尾及 P2 完整双语，英文保留整词，优先用标点和阅读宽度换行。第 1、5 段英文三行，其他中英文均为一至两行。清单记录整段呈现，未估算子句对齐。真实中文、复杂访谈和平台客户端遮挡仍待实际验证。
+本片以「同类工单总人工耗时连续几天没降，就暂停扩大试点。」提炼 P2 原创解读中的停止线，独立标为原创结论。原长文的后续排查步骤保留于 P2 计划，可在显式长文技术预览查看。默认无配音且原文过长时，预览验证了待完善草稿标识和零尾卡。配音路径用自有 2.4 秒测试音与两条定时字幕验证，成品 48.367 秒；人工解读录音待实际使用。
+
+实际运行命令
+.\.venv\Scripts\python.exe src/render.py workspace/p3-real-chain --output output/p4-review --conclusion '同类工单总人工耗时连续几天没降，就暂停扩大试点。' --cover-title-en 'How Much Time Does AI Support Save?'
+.\.venv\Scripts\python.exe src/render.py workspace/p3-real-chain --output output/p4-config-check --preview-only --brand workspace/p4-acceptance/alternate-brand.json --cover-time-ms 10000 --conclusion '同类工单总人工耗时连续几天没降，就暂停扩大试点。'
+.\.venv\Scripts\python.exe src/render.py workspace/p3-real-chain --output output/p4-draft-check --preview-only
+.\.venv\Scripts\python.exe src/render.py workspace/p3-real-chain --output output/p4-long-check --preview-only --mode long-text-preview
+.\.venv\Scripts\python.exe src/render.py workspace/p3-real-chain --output output/p4-voice-check --voiceover workspace/p4-acceptance/voice-test.wav --voiceover-cues workspace/p4-acceptance/voice-test.json
+.\.venv\Scripts\python.exe workspace/p4-acceptance/verify-deliverables.py
+.\.venv\Scripts\python.exe workspace/p4-acceptance/verify-composition.py
+.\.venv\Scripts\python.exe workspace/p4-acceptance/verify-skills.py
+
+验收证据
+A　同源、同片段、同选轨、时轴及文本保全通过。1080×1920 / 30 fps / H.264 Main / AAC LC 可完整解码。重用成品路径返回 1，全部成品哈希保持原样。
+B　现存验收素材为合成测试。自制 3 秒横屏和竖屏模拟画面均带标识，验证了长标题、双语区域和方形比例。fit 保留测试画面边缘，center-crop 裁去标记边缘。证据为 workspace/p4-acceptance/composition-grid.png。
+C　封面取源画面流 0，默认请求源播放 17663 ms。1080×1920 PNG 与中央 1080×1440 的像素裁切核对通过，中央裁切中品牌及中英文标题可读。显式 10000 ms 路径通过，预览强调色像素由 RGB 229/199/141 变为 115/218/200。Codex 0.171.0 已发现两个仓库 Skill。
+
+交付路径（仓库根目录 D:\Desktop\Kai-Content-Agent）
+output/p4-review/video.mp4, cover.png, cover-3x4.png
+output/p4-review/subtitles.ass, timeline.json, render_manifest.json
+output/p4-review/frame-title.png, frame-subtitles.png, frame-commentary.png
+P4-REVIEW.txt
+人工审核待确认。P3 限制记载于 STATUS.md。
+
+本地 Git
+已验收父基线 d00dd960bd70173762809e05a31f0cfe54aa7127。P4 提交和提交后的工作区状态见交付报告。可用 git log -1 --format=%H -- P4-REVIEW.txt 定位此检查点。
