@@ -1,0 +1,324 @@
+Kai Content Agent - P1 core implementation and dependency configuration
+
+===== src/preprocess.py =====
+"""Process one authorized local media file into an independent workspace task."""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from media import extract_audio, probe
+from transcribe import transcribe, write_srt
+
+PROJECT = Path(__file__).resolve().parents[1]
+
+
+def process(args: argparse.Namespace) -> None:
+    source = args.input.resolve(strict=True)
+    if not source.is_file():
+        raise ValueError(f"Input must be a local media file: {source}")
+
+    requested_output = args.output
+    if requested_output.exists() or requested_output.is_symlink():
+        raise FileExistsError(f"Task output already exists: {requested_output}")
+    output = requested_output.resolve()
+    workspace = PROJECT / "workspace"
+    if workspace not in output.parents:
+        raise ValueError(f"Choose a new task directory under {workspace}.")
+
+    metadata, audio_index, origin_us = probe(source, args.audio_stream)
+    timeline = {
+        "reference": "source_playback",
+        "source_pts_origin_ms": round(origin_us / 1000),
+        "audio_zero_ms": 0,
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    # Write into a sibling directory. Windows rename publishes it without overwriting
+    # a task directory created by another process after the initial existence check.
+    with TemporaryDirectory(prefix=".p1-", dir=output.parent) as scratch:
+        staged = Path(scratch) / "task"
+        staged.mkdir()
+        audio = staged / "audio.wav"
+        duration_ms = extract_audio(source, audio_index, origin_us, audio)
+        write_json(staged / "media.json", {
+            "schema_version": 1,
+            "source_media": str(source),
+            "source": args.source or source.as_uri(),
+            "rights_status": args.rights,
+            "ai_label": args.ai_label,
+            **metadata,
+            "audio_duration_ms": duration_ms,
+            "timeline": timeline,
+        })
+        transcript = transcribe(
+            audio, duration_ms, timeline, source, PROJECT, args.model, args.device,
+            args.language, args.word_timestamps,
+        )
+        write_json(staged / "transcript.json", transcript)
+        write_srt(staged / "transcript.srt", transcript["segments"])
+        if output.exists() or output.is_symlink():
+            raise FileExistsError(f"Task output already exists: {output}")
+        staged.rename(output)
+
+    print(
+        f"{output} | {len(transcript['segments'])} segments | "
+        f"{transcript['language']} | inference {transcript['transcription_seconds']:.3f}s"
+    )
+
+
+def write_json(path: Path, value: dict) -> None:
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("input", type=Path, help="Local audio or video file")
+    parser.add_argument("--output", type=Path, required=True, help="New task directory under workspace")
+    parser.add_argument("--rights", required=True, choices=("owned", "authorized"), help="Confirmed source rights")
+    parser.add_argument("--source", help="Provenance, such as a source URL or recording note")
+    parser.add_argument("--ai-label", choices=("required", "not-required", "unknown"), default="unknown")
+    parser.add_argument("--audio-stream", type=int, help="Absolute FFprobe stream index")
+    parser.add_argument("--model", default="small", help="faster-whisper model name")
+    parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument("--language", choices=("auto", "zh", "en"), default="auto")
+    parser.add_argument("--word-timestamps", action="store_true")
+    args = parser.parse_args()
+    try:
+        process(args)
+    except (ImportError, OSError, RuntimeError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+===== src/media.py =====
+"""Probe a local source and extract timestamp-aligned speech audio."""
+
+import json
+import subprocess
+import wave
+from decimal import Decimal
+from pathlib import Path
+
+SAMPLE_RATE = 16_000
+
+
+def run_media_tool(command: list[str]) -> str:
+    try:
+        result = subprocess.run(
+            command, capture_output=True, text=True, encoding="utf-8",
+            errors="replace", check=True,
+        )
+    except FileNotFoundError as error:
+        raise RuntimeError(f"{command[0]} is not available on PATH.") from error
+    except subprocess.CalledProcessError as error:
+        detail = error.stderr.strip() or f"exit code {error.returncode}"
+        raise RuntimeError(f"{command[0]} failed: {detail}") from error
+    return result.stdout
+
+
+def probe(source: Path, stream_index: int | None) -> tuple[dict, int, int]:
+    entries = (
+        "format=format_name,start_time,duration:"
+        "stream=index,codec_type,codec_name,start_time,duration,width,height,sample_rate,channels:"
+        "stream_tags=language,title:stream_disposition=default,attached_pic"
+    )
+    metadata = json.loads(run_media_tool([
+        "ffprobe", "-v", "error", "-show_entries", entries, "-of", "json", str(source),
+    ]))
+    streams = metadata["streams"]
+    audio = [stream for stream in streams if stream["codec_type"] == "audio"]
+    if not audio:
+        raise ValueError("No audio stream found in the source media.")
+    if stream_index is None:
+        selected = next(
+            (stream for stream in audio if stream.get("disposition", {}).get("default")),
+            audio[0],
+        )
+    else:
+        selected = next((stream for stream in audio if stream["index"] == stream_index), None)
+        if selected is None:
+            available = ", ".join(str(stream["index"]) for stream in audio)
+            raise ValueError(f"Stream {stream_index} is not an audio stream. Audio indexes: {available}.")
+
+    file_format = metadata["format"]
+    source_start = file_format.get("start_time")
+    origin_us = round(Decimal(source_start) * 1_000_000) if source_start not in (None, "N/A") else 0
+    for item in [file_format, *streams]:
+        for original, converted in (("start_time", "start_pts_ms"), ("duration", "duration_ms")):
+            seconds = item.pop(original, None)
+            item[converted] = round(Decimal(seconds) * 1000) if seconds not in (None, "N/A") else None
+    details = {"format": file_format, "streams": streams, "selected_audio_index": selected["index"]}
+    return details, selected["index"], origin_us
+
+
+def extract_audio(source: Path, stream_index: int, origin_us: int, target: Path) -> int:
+    # Keep source PTS, move playback zero to 0, and pad or trim to that zero.
+    timeline_filter = (
+        f"asetpts=PTS-({origin_us})/1000000/TB,"
+        f"aresample={SAMPLE_RATE}:async=1:first_pts=0"
+    )
+    run_media_tool([
+        "ffmpeg", "-v", "error", "-nostdin", "-n", "-copyts", "-i", str(source),
+        "-map", f"0:{stream_index}", "-af", timeline_filter, "-ac", "1",
+        "-c:a", "pcm_s16le", str(target),
+    ])
+    with wave.open(str(target), "rb") as audio:
+        duration_ms = round(audio.getnframes() * 1000 / audio.getframerate())
+    if duration_ms <= 0:
+        raise ValueError("The selected audio stream has no decodable samples.")
+    return duration_ms
+
+===== src/transcribe.py =====
+"""Run local Whisper inference and serialize its source-aligned timeline."""
+
+import os
+from pathlib import Path
+from sysconfig import get_path
+from time import perf_counter
+
+
+def configure_runtime(project: Path) -> None:
+    cache = project / ".cache" / "huggingface"
+    scratch = project / "tmp"
+    scratch.mkdir(exist_ok=True)
+    os.environ.update({
+        "HF_HOME": str(cache),
+        "HF_HUB_CACHE": str(project / "models"),
+        "HF_XET_CACHE": str(cache / "xet"),
+        "HF_HUB_DISABLE_IMPLICIT_TOKEN": "1",
+        "TEMP": str(scratch),
+        "TMP": str(scratch),
+        "TMPDIR": str(scratch),
+    })
+
+
+def transcribe(
+    audio: Path,
+    duration_ms: int,
+    timeline: dict,
+    source: Path,
+    project: Path,
+    model_name: str,
+    device: str,
+    language: str,
+    word_timestamps: bool,
+) -> dict:
+    configure_runtime(project)
+    if os.name == "nt" and device == "cuda":
+        vendor = Path(get_path("purelib")) / "nvidia"
+        bins = [vendor / name / "bin" for name in ("cuda_runtime", "cublas", "cudnn")]
+        # CTranslate2's native loader searches the process PATH.
+        os.environ["PATH"] = os.pathsep.join([
+            *(str(path) for path in bins if path.is_dir()), os.environ.get("PATH", ""),
+        ])
+
+    from ctranslate2 import get_supported_compute_types
+    from faster_whisper import WhisperModel, available_models, download_model
+    from huggingface_hub.errors import LocalEntryNotFoundError
+
+    if model_name not in available_models():
+        raise ValueError(f"Unknown model {model_name!r}. Choose from: {', '.join(available_models())}.")
+
+    compute_type = "float16" if device == "cuda" else "int8"
+    if compute_type not in get_supported_compute_types(device):
+        raise RuntimeError(f"{device} does not support {compute_type} on this machine.")
+
+    cache_dir = str(project / "models")
+    try:
+        cached = Path(download_model(model_name, cache_dir=cache_dir, local_files_only=True))
+    except LocalEntryNotFoundError:
+        cached = None
+    if cached is None or not has_model_files(cached):
+        print(f"Downloading {model_name} to {cache_dir} ...", flush=True)
+        try:
+            cached = Path(download_model(model_name, cache_dir=cache_dir))
+        except LocalEntryNotFoundError as error:
+            raise RuntimeError(f"Could not obtain {model_name} from the model hub: {error}") from error
+        if not has_model_files(cached):
+            raise RuntimeError(f"Incomplete model snapshot: {cached}")
+
+    print(f"Transcribing with {model_name}, {device}, {compute_type} ...", flush=True)
+    load_start = perf_counter()
+    model = WhisperModel(str(cached), device=device, compute_type=compute_type)
+    if language == "zh" and not model.model.is_multilingual:
+        raise ValueError(f"Model {model_name!r} is English-only. Select a multilingual model for zh.")
+    segmentation_start = perf_counter()
+    recognized, info = model.transcribe(
+        str(audio), task="transcribe", language=None if language == "auto" else language,
+        word_timestamps=word_timestamps, vad_filter=True,
+    )
+    segments = []
+    for item in recognized:
+        text = " ".join(item.text.split())
+        start = bound_ms(item.start, duration_ms)
+        end = bound_ms(item.end, duration_ms)
+        if not text or end <= start:
+            continue
+        segment = {"id": len(segments) + 1, "start_ms": start, "end_ms": end, "text": text}
+        if item.words is not None:
+            segment["words"] = [
+                {
+                    "start_ms": bound_ms(word.start, duration_ms),
+                    "end_ms": bound_ms(word.end, duration_ms),
+                    "text": word.word,
+                }
+                for word in item.words
+            ]
+        segments.append(segment)
+
+    return {
+        "schema_version": 1,
+        "source_media": str(source),
+        "language": info.language,
+        "language_probability": info.language_probability,
+        "model": model_name,
+        "model_revision": cached.name,
+        "device": device,
+        "compute_type": compute_type,
+        "duration_ms": duration_ms,
+        "timeline": timeline,
+        "model_load_seconds": round(segmentation_start - load_start, 3),
+        "transcription_seconds": round(perf_counter() - segmentation_start, 3),
+        "segments": segments,
+    }
+
+
+def has_model_files(path: Path) -> bool:
+    required = ("model.bin", "config.json", "tokenizer.json")
+    return all((path / name).is_file() for name in required) and any(
+        (path / name).is_file() for name in ("vocabulary.txt", "vocabulary.json")
+    )
+
+
+def bound_ms(seconds: float, duration_ms: int) -> int:
+    return min(duration_ms, max(0, round(seconds * 1000)))
+
+
+def srt_timestamp(milliseconds: int) -> str:
+    seconds, ms = divmod(milliseconds, 1000)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{ms:03d}"
+
+
+def write_srt(path: Path, segments: list[dict]) -> None:
+    with path.open("w", encoding="utf-8", newline="\n") as file:
+        for segment in segments:
+            start = srt_timestamp(segment["start_ms"])
+            end = srt_timestamp(segment["end_ms"])
+            file.write(f"{segment['id']}\n{start} --> {end}\n{segment['text']}\n\n")
+
+===== requirements.txt =====
+faster-whisper==1.2.1
+ctranslate2==4.9.1
+huggingface-hub==2.4.0
+
+===== requirements-gpu.txt =====
+nvidia-cublas-cu12==12.9.1.4
+nvidia-cuda-runtime-cu12==12.9.79
