@@ -2,7 +2,9 @@
 
 **P0 — PASS**
 
-**P1 — AWAITING_GPT_REVIEW**
+**P1 — PASS WITH LIMITATIONS**
+
+**P2 — AWAITING_GPT_REVIEW**
 
 GPT 已验收 P0 基线 `5a59e6d27486587e5eee7dfe5493b08658828579`。项目位于 Windows 真实桌面 `D:\Desktop\Kai-Content-Agent`，原始环境检查与初始化证据保留在 P0 提交。
 
@@ -19,4 +21,21 @@ GPT 已验收 P0 基线 `5a59e6d27486587e5eee7dfe5493b08658828579`。项目位�
 - 正常路径、选轨、源文件哈希检查、同名任务拒绝且四个文件哈希不变、无音轨报错均通过。产物位于 `workspace/p1-cpu-small/` 和 `workspace/p1-gpu-medium/`。合成英文样本验证了工作流。中文、真实采访及复杂背景音的识别质量没有在这次样本中测量。
 - Hugging Face 直连在本机超时，两套权重经 ModelScope 取得并与 Systran 官方 SHA-256 一致。缓存已可供本地重用。
 
-等待 GPT 审核 P1。
+## P1 审核结论
+
+GPT 已验收 P1 基线 `59a702e520970650675ad58903d40f17d6b3b9a3`。生产配置冻结为 `medium / cuda / float16`，CPU 备用为 `small / cpu / int8`。
+
+- P1-L01　真实访谈、中文和复杂背景音尚未验证。
+- P1-L02　识别段落边界存在估计偏差，成品同步由 P3 验证。
+- P1-L03　GPU 实装依赖和 ModelScope 获取与校验方式见上文 P1 记录。
+
+## P2 实际结果
+
+- 本机 Codex Desktop 0.171.0 的 `skills/list` 已报告仓库内 `kai-analyze` 启用。本会话按 Skill 完成输入准备、选段排序、精翻、原创解读和结构校验。
+- 正向验收使用原创英文科技与商业短讲，由本地 Microsoft Zira Desktop 合成 95.010 秒 WAV。用音频帧计时生成 P1 格式的输入，自有素材，要求 AI 标识。没有重新运行 P1。
+- 候选 2 个。`ai-support-review-cost` 得 92.05 分，源播放 400–46725 ms，段 1–4，优先制作。`test-model-on-user-tasks` 得 88.70 分，源播放 46975–94760 ms，段 5–8。推荐译文 4 段按 ID 对齐，原文保持一致。
+- 正向方案与逐段翻译的结构校验通过。现有 P1 GPU 工程样本判断为零候选，只生成 `analysis.json`。另在验收副本将候选结束时间增加 1 ms，校验以错误退出。上述路径的 P1 原始产物和正向验收输入经 SHA-256 核对未变。
+- 本地生成审核包并导入一次模拟回复，记录一条接受、一条拒绝及原因。未向 Gemini 发送素材，人工内容确认仍待进行。
+- 正向产物位于 `workspace/p2-kai-acceptance/analysis/`，零候选产物位于 `workspace/p1-gpu-medium/analysis/`。Git 仅包含代码、文档和审核文本内的合成样本计划。长素材、真实中文访谈的语义质量和 P3 成品同步未在本阶段验证。
+
+等待 GPT 审核 P2。

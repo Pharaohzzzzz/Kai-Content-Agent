@@ -1,0 +1,15 @@
+{
+  "audience": "关注 AI 工具、技术趋势和商业实践的中文受众，包括创业者、独立开发者及希望提高工作效率的普通人。",
+  "topics": ["AI 前沿科技", "商业认知", "个人成长与生产力", "创业及独立开发"],
+  "prefer": ["有反常识价值", "因果逻辑明确", "对普通人有科技或商业启发", "有具体事实、案例或行动建议", "少量背景即可独立理解"],
+  "deprioritize": ["空洞鸡汤", "重复常识", "缺失上下文", "无法核实的夸张论断", "仅凭名人身份吸引流量"],
+  "preferred_duration_ms": [30000, 90000],
+  "max_candidates": 5,
+  "scoring_weights_percent": {
+    "information_value": 30,
+    "audience_fit": 25,
+    "argument_completeness": 20,
+    "sharing_potential": 15,
+    "differentiation_and_business_value": 10
+  }
+}
