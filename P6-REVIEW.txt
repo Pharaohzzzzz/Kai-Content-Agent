@@ -1,0 +1,1080 @@
+===== Kai Content Agent P6 审核交接 =====
+
+状态 AWAITING_GPT_REVIEW
+基线 e52913bbfecab93f972c8f00b0570ce3d60f3a39
+P5 二次审核 PASS WITH LIMITATIONS。去重、名额与校验均按制作准入优先，分数原值保留。
+针对性案例修复前得到 99、95、91 三条待核实候选。修复后入选 83 可制作、71 可制作、95 待核实，99 同事件稿被归为重复。
+事实、引文语境和素材权利仍需人工核查。自动来源偏重英文。AIHOT 待授权且禁用，日常研究成本未测量。
+P6 最终候选 output/p6-ai-reliability/，选题历史为 produced，人工审核待确认。
+真实录音、外部素材和客户端遮挡未在本次成片实测。P4 已知的未跟踪审核文件仍在项目中。
+
+===== 本次成片验收 =====
+
+5 场景，19 句字幕，1870 帧，62.333 秒，1,839,892 字节。
+1080×1920 @ 30 FPS，NVENC H.264 Main，AAC LC 单声道 48 kHz。完整解码通过，用时 0.608 秒。
+生产 9.298 秒，配音准备 0.914 秒，逐景编码与封装 7.920 秒。
+19 条字幕逐句核对 ASS 文本及样本边界。解码后的 AAC 语音由本地 faster-whisper medium / CPU / int8 复核为中文，识别出 85.8%、4,727 元四角、27 元及末句。个别同音误识别保留在 QA 转写。
+最后语音测至 62.169 秒（-40 dB 阈值），末尾静音约 0.165 秒。改图前后解码 PCM 字节一致，最终使用完整解码的版本。
+封面及三帧已目视核对：18.327 秒论文图表，45.307 秒报价单结果，60.378 秒结论。产物 SHA-256 与清单一致。
+独立数据验证：VALID original storyboard: 仓储校验示例 | inventory-opening, inventory-chart。仓储示例未渲染完整视频。
+本机 Codex 0.171.0 的 skills/list 返回 kai-create、scope=repo、enabled=true。
+品牌沿用 config/kai-brand.json，版本 1.0，SHA-256 39c1da7dd6996ec4f591e5b95f8daf5b65e49eb5d2a10e8b3d097dc9b94ca011。
+视频 SHA-256 baf10d44f1de55e073ab24a6d50220ab4bf5255f976c585a4fa220fc9eba52bb。
+
+===== 验证命令与证据位置 =====
+
+P5 单案例 workspace/p6-ai-reliability/p5-ranking-check.py
+P6 命令 .venv/Scripts/python.exe -X utf8 src/create.py workspace/p6-ai-reliability/storyboard.json --output output/新目录
+完整解码 ffmpeg -v error -xerror -nostdin -i output/p6-ai-reliability/video.mp4 -map 0:v:0 -map 0:a:0 -f null NUL
+实测原始证据 workspace/p6-ai-reliability/evidence/
+音视频 QA 记录 workspace/p6-ai-reliability/qa-report.json 和 qa-asr/，文件名以工作区实际路径为准。
+
+===== 事实及报价单评分记录 =====
+
+# AI 答对一次，就值得信任吗？
+
+选题 `p5-2026-11-26:ai-reliability-repeat-test`。人工审核待确认。
+
+## 事实来源
+
+Google DeepMind 于 2026 年 11 月 24 日发布 HFE，用 544 个文本或图文提示组成 136 个四题组，考察相近任务的重复可靠性。 [官方公告](https://blog.google/innovation-and-ai/models-and-research/google-deepmind/humanitys-first-exam/)
+
+技术报告表 3、表 4 将四个提示每题抽取四次，估计一组 16 次里至少答对一次与全部答对的概率。前五模型的前一指标均为 100%。后一指标依次为 92.4%、86.9%、85.8%、83.4%、80.5%，等权平均为 85.8%。图表为 Kai 自绘。 [技术报告](https://storage.googleapis.com/deepmind-media/papers/hfe_tech_paper.pdf)
+
+## 报价单四问
+
+虚构报价单 K-026。先冻结统一报价单、四条等价问法、人工标准和逐项评分。安装 2 × ¥1,250.00 × 90%，配置 3 × ¥680.00，折后未税小计 ¥4,290.00。按 6% 计税 ¥257.40，另加不计税配送 ¥180.00，实际应付 ¥4,727.40。印刷金额 ¥4,754.40，高估 ¥27.00。
+
+| 问法 | 未税小计 | 税额 | 应付金额 | 印刷差额 | 分数 |
+| --- | ---: | ---: | ---: | --- | ---: |
+| 复核单据 | ¥4,290.00 | ¥257.40 | ¥4,727.40 | 高估 ¥27.00 | 4/4 |
+| 付款核对 | ¥4,290.00 | ¥257.40 | ¥4,727.40 | 高估 ¥27.00 | 4/4 |
+| 供应商验收 | ¥4,290.00 | ¥257.40 | ¥4,727.40 | 高估 ¥27.00 | 4/4 |
+| 重新结算 | ¥4,290.00 | ¥257.40 | ¥4,727.40 | 高估 ¥27.00 | 4/4 |
+
+Codex CLI 0.171.0，模型参数 `gpt-6.2-sol`，推理强度 `low`。四个临时进程、四个不同上下文，各仅提交对应提示一次，共取得四个完整回复。关闭用户配置、记忆、Shell 工具及网页搜索，四轮日志均无工具调用。标准与其他轮次的回复未进入提示。客户端记录 WebSocket 超时后回退 HTTPS。首轮日志包含完整 `turn.completed`，npm 启动器随后超时退出。温度、种子和服务端模型快照未公开。
+
+四轮均逐项通过，共 16/16 个字段。这 16 个字段来自四份回复。试验范围仅是一个模型、一张虚构报价单、四种问法各一次，不能据此估计生产场景可靠性或与 HFE 的 16 次回答直接比较。
+
+原始提示、完整回复、调用日志、设置及评分位于项目 `workspace/p6-ai-reliability/evidence/`。素材为项目原创或自绘，使用本地中文合成语音，画面持续标记「含 AI 生成内容」。
+
+===== 四轮耗时与 Token =====
+
+第 1 轮 126.232 秒，launcher exit timeout after captured turn.completed，{"input_tokens": 22213, "cached_input_tokens": 0, "cache_write_input_tokens": 0, "output_tokens": 261, "reasoning_output_tokens": 24}
+第 2 轮 124.919 秒，exit 0，{"input_tokens": 22218, "cached_input_tokens": 20096, "cache_write_input_tokens": 0, "output_tokens": 233, "reasoning_output_tokens": 24}
+第 3 轮 122.766 秒，exit 0，{"input_tokens": 22227, "cached_input_tokens": 20096, "cache_write_input_tokens": 0, "output_tokens": 217, "reasoning_output_tokens": 18}
+第 4 轮 122.802 秒，exit 0，{"input_tokens": 22229, "cached_input_tokens": 10624, "cache_write_input_tokens": 0, "output_tokens": 211, "reasoning_output_tokens": 24}
+第 1 轮耗时按冻结设置文件至完整日志时间估算。后三轮并行，各时间为 CLI 墙钟用时，含传输回退和退出。四轮均只有一条完整回复。
+合计 {"input_tokens": 88887, "cached_input_tokens": 50816, "cache_write_input_tokens": 0, "output_tokens": 922, "reasoning_output_tokens": 90}
+主会话 Token 分项未暴露。
+
+===== P5 核心改动 =====
+
+diff --git a/src/research.py b/src/research.py
+index 518c9b1..e64871d 100644
+--- a/src/research.py
++++ b/src/research.py
+@@ -15 +15 @@ from research_collect import SHANGHAI, collect_source, discovery, manual_rows, r
+-from research_topics import READY, TOPIC_STATES, WEIGHTS, daily_brief, gemini_prompt, prepare_topic, rank_topics
++from research_topics import READY, TOPIC_STATES, WEIGHTS, daily_brief, gemini_prompt, prepare_topic, rank_topics, topic_sort_key
+@@ -171 +171 @@ def validate(args):
+-    if saved != sorted(saved, key=lambda row: (-row["score"], row["slug"])):
++    if saved != sorted(saved, key=topic_sort_key):
+diff --git a/src/research_topics.py b/src/research_topics.py
+index 6eb0a76..0a99cfa 100644
+--- a/src/research_topics.py
++++ b/src/research_topics.py
+@@ -216,0 +217,4 @@ def match_topic(topic, prior):
++def topic_sort_key(row):
++    return row["production_state"] != READY, -row["score"], row["slug"]
++
++
+@@ -219 +223 @@ def rank_topics(topics, history, max_topics):
+-    for topic in sorted(topics, key=lambda row: (-row["score"], row["slug"])):
++    for topic in sorted(topics, key=topic_sort_key):
+
+===== src/create.py =====
+
+"""Render a versioned original storyboard and local narration to a review candidate."""
+
+import argparse
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+from tempfile import TemporaryDirectory
+from time import perf_counter
+
+from analysis_plan import json_text, read_json, require, required_text
+from create_audio import RIGHTS, local_asset, prepare_audio
+from create_visuals import asset_region, captions, scene_events
+from media import run_media_tool
+from render import ENCODERS, inspect_video, new_output, sha256
+from render_brand import DEFAULT_BRAND, FPS, color_input, ffmpeg_still, load_brand
+from render_commentary import SAMPLE_RATE
+from render_subtitles import write_events
+
+HUMAN_REVIEW = "pending"
+
+
+def disclosure(plan):
+    return "含 AI 生成内容" if plan["ai_generated"] else ""
+
+
+def load_storyboard(path, brand):
+    plan = read_json(path)
+    require(type(plan["schema_version"]) is int and plan["schema_version"] == 1, "Expected storyboard schema version 1.")
+    for label in ("topic_id", "title", "evidence"):
+        required_text(plan[label], label)
+    review_note = (path.parent / plan["evidence"]).resolve()
+    require(review_note.is_file() and review_note.suffix.lower() == ".md", "Use a local Markdown evidence record.")
+    require(plan["mode"] in {"release-candidate", "method-demo-draft"}, "Choose a supported production mode.")
+    require(type(plan["ai_generated"]) is bool, "Declare the AI content status.")
+    if plan["ai_generated"]:
+        required_text(plan["ai_note"], "AI content note")
+    voice_mode = plan["voice"]["mode"]
+    require(voice_mode in {"windows-tts", "recording"}, "Provide Windows TTS or original recordings.")
+    require(voice_mode != "windows-tts" or plan["ai_generated"], "Mark synthesized narration as AI content.")
+
+    require(isinstance(plan["sources"], list), "Sources must be a list of source records.")
+    for source in plan["sources"]:
+        for key in ("title", "url", "use"):
+            required_text(source[key], f"source {key}")
+    require(isinstance(plan["materials"], list) and plan["materials"], "Record the origin and rights of the visual and audio materials.")
+    for item in plan["materials"]:
+        for key in ("description", "origin", "rights_note"):
+            required_text(item[key], f"material {key}")
+        require(item["rights"] in RIGHTS, f"Unconfirmed material rights: {item['description']}")
+        require(type(item["ai_generated"]) is bool and (not item["ai_generated"] or plan["ai_generated"]),
+                f"Check the AI declaration for {item['description']}.")
+
+    scenes = plan["scenes"]
+    require(isinstance(scenes, list) and scenes and scenes[0]["visual"]["kind"] == "title", "A storyboard starts with a title scene.")
+    ids = [required_text(scene["id"], "scene id") for scene in scenes]
+    require(len(set(ids)) == len(ids), "Scene IDs must be unique.")
+    frame_ids = plan.get("review_scene_ids", ids[:3])
+    require(isinstance(frame_ids, list) and len(frame_ids) == len(set(frame_ids))
+            and 1 <= len(frame_ids) <= 3 and set(frame_ids) <= set(ids), "Choose up to three distinct review scene IDs.")
+    assets = {}
+    for scene in scenes:
+        narration = scene["narration"]
+        require(isinstance(narration, list) and narration, f"Scene {scene['id']} needs audible narration.")
+        for cue in narration:
+            spoken = required_text(cue["spoken"], "spoken phrase")
+            caption = required_text(cue.get("subtitle", spoken), "subtitle")
+            captions(brand, [dict(text=caption, start_ms=0, end_ms=1000)])
+            if voice_mode == "recording":
+                local_asset(path.parent, cue["recording"], "narration recording")
+                require(not cue["recording"]["ai_generated"] or plan["ai_generated"], "Recording AI declaration is missing.")
+        visual = scene["visual"]
+        required_text(visual["title"], "visual title")
+        if visual["kind"] in {"image", "video"}:
+            assets[scene["id"]] = local_asset(path.parent, visual["asset"], "scene asset")
+            require(not visual["asset"]["ai_generated"] or plan["ai_generated"], "Visual asset AI declaration is missing.")
+        scene_events(brand, visual, 1000, disclosure(plan), draft=plan["mode"] == "method-demo-draft")
+    cover = {**scenes[0]["visual"], "title": plan["title"]}
+    scene_events(brand, cover, 1000, disclosure(plan), cover=True, draft=plan["mode"] == "method-demo-draft")
+    return plan, review_note, assets, frame_ids
+
+
+def draw_scene(directory, brand, visual, asset, frame_count, media_name, cover=False, encoder="h264_nvenc"):
+    inputs = ["-f", "lavfi", "-i", color_input(brand)]
+    graph = "[0:v]format=yuv420p"
+    if asset:
+        region = asset_region(brand)
+        w, h = region["w"], region["h"]
+        inputs += ["-i", str(asset)]
+        graph += (
+            f"[base];[1:v:0]setpts=PTS-STARTPTS,fps={FPS},"
+            f"scale={w}:{h}:force_original_aspect_ratio=decrease:force_divisible_by=2:reset_sar=1"
+            f"[asset];[base][asset]overlay="
+            f"x={region['x']}+({w}-w)/2:y={region['y']}+({h}-h)/2:eof_action=repeat:repeatlast=1"
+        )
+    graph += ",ass=scene.ass[v]"
+    args = [*inputs, "-filter_complex_threads", "1", "-filter_complex", graph, "-map", "[v]"]
+    if cover:
+        ffmpeg_still([*args, "-frames:v", "1", "-threads:v", "1", "-update", "1", media_name], directory)
+        return
+    result = subprocess.run([
+        "ffmpeg", "-hide_banner", "-loglevel", "info", "-nostdin", "-n", "-nostats", "-xerror",
+        *args, "-frames:v", str(frame_count), "-an", "-c:v", encoder, *ENCODERS[encoder],
+        "-bf", "0", "-pix_fmt", "yuv420p", "-video_track_timescale", str(FPS * 512), media_name,
+    ], cwd=directory, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    require(result.returncode == 0, f"Scene render failed: {visual['title']}\n" + "\n".join(result.stderr.splitlines()[-18:]))
+    require("failed to find any fallback" not in result.stderr.lower(), "A scene glyph is missing in libass.")
+    require("fontselect:" in result.stderr, "libass did not select a scene font.")
+
+
+def render(args):
+    started = perf_counter()
+    source = args.storyboard.resolve()
+    brand, brand_sha = load_brand(args.brand.resolve())
+    plan, review_note, assets, frame_ids = load_storyboard(source, brand)
+    if args.check:
+        print(f"VALID original storyboard: {plan['title']} | {', '.join(scene['id'] for scene in plan['scenes'])}")
+        return
+    require(args.output is not None, "Rendering needs a new --output under the project output directory.")
+    output = new_output(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".create-", dir=output.parent) as temp:
+        scratch = Path(temp)
+        staged = scratch / "ready"
+        staged.mkdir()
+        voice_start = perf_counter()
+        timeline, voice = prepare_audio(plan, source.parent, scratch)
+        voice_seconds = perf_counter() - voice_start
+        encode_start = perf_counter()
+        scene_files, all_captions = [], []
+        label = disclosure(plan)
+        draft = plan["mode"] == "method-demo-draft"
+        for index, (scene, span) in enumerate(zip(plan["scenes"], timeline, strict=True)):
+            duration = span["end_ms"] - span["start_ms"]
+            frames = span["end_frame"] - span["start_frame"]
+            events = scene_events(brand, scene["visual"], duration, label, draft=draft)
+            events += captions(brand, span["cues"], span["start_ms"])
+            all_captions.extend(captions(brand, span["cues"]))
+            write_events(scratch / "scene.ass", brand, events)
+            name = f"scene-{index:03}.mp4"
+            draw_scene(scratch, brand, scene["visual"], assets.get(scene["id"]), frames, name, encoder=args.encoder)
+            scene_files.append(f"file '{name}'\nduration {frames / FPS:.9f}\n")
+
+        cuts = scratch / "scenes.ffconcat"
+        cuts.write_text("ffconcat version 1.0\n" + "".join(scene_files), encoding="ascii")
+        run_media_tool([
+            "ffmpeg", "-v", "error", "-xerror", "-nostdin", "-n", "-f", "concat", "-safe", "1",
+            "-i", str(cuts), "-i", str(scratch / "narration.wav"), "-map", "0:v:0", "-map", "1:a:0",
+            "-c:v", "copy", "-c:a", "aac", "-b:a", "128k", "-ar", str(SAMPLE_RATE), "-ac", "1",
+            "-map_metadata", "-1", "-movflags", "+faststart", str(staged / "video.mp4"),
+        ])
+        encode_seconds = perf_counter() - encode_start
+        media_info = inspect_video(staged / "video.mp4", timeline[-1]["end_frame"], 1)
+        write_events(staged / "subtitles.ass", brand, all_captions)
+
+        intro = {**plan["scenes"][0]["visual"], "title": plan["title"]}
+        write_events(scratch / "scene.ass", brand, scene_events(brand, intro, 1000, label, cover=True, draft=draft))
+        draw_scene(scratch, brand, intro, None, 1, "cover.png", cover=True)
+        shutil.move(scratch / "cover.png", staged / "cover.png")
+        spans = {scene["id"]: span for scene, span in zip(plan["scenes"], timeline, strict=True)}
+        frame_records = []
+        for index, scene_id in enumerate(frame_ids, 1):
+            cue = max(spans[scene_id]["cues"], key=lambda item: item["end_ms"] - item["start_ms"])
+            at_ms = (cue["start_ms"] + cue["end_ms"]) // 2
+            filename = f"frame-{index:02}.png"
+            ffmpeg_still([
+                "-ss", f"{at_ms / 1000:.3f}", "-i", str(staged / "video.mp4"), "-map", "0:v:0",
+                "-frames:v", "1", "-threads:v", "1", "-update", "1", filename,
+            ], staged)
+            frame_records.append(dict(file=filename, scene_id=scene_id, at_ms=at_ms))
+
+        evidence = "facts-and-test.md"
+        shutil.copyfile(review_note, staged / evidence)
+        snapshot = {
+            **plan, "evidence": evidence, "source_storyboard": str(source), "human_review": HUMAN_REVIEW,
+            "scenes": [{**scene, "timeline": span} for scene, span in zip(plan["scenes"], timeline, strict=True)],
+        }
+        (staged / "storyboard.json").write_text(json_text(snapshot), encoding="utf-8")
+        manifest = dict(
+            schema_version=1, title=plan["title"], topic_id=plan["topic_id"], mode=plan["mode"],
+            human_review=HUMAN_REVIEW, ai_generated=plan["ai_generated"], ai_note=plan.get("ai_note"),
+            storyboard=dict(path=str(source), sha256=sha256(source)),
+            brand=dict(path=str(args.brand.resolve()), sha256=brand_sha, version=brand["version"]),
+            source_assets={key: dict(path=str(value), sha256=sha256(value)) for key, value in assets.items()},
+            voice=voice, encoder=args.encoder, media=media_info,
+            timings=dict(narration_seconds=round(voice_seconds, 3), encoding_seconds=round(encode_seconds, 3),
+                         production_seconds=round(perf_counter() - started, 3)),
+            review_frames=frame_records,
+            artifacts_sha256={file.name: sha256(file) for file in sorted(staged.iterdir())},
+        )
+        (staged / "render_manifest.json").write_text(json_text(manifest), encoding="utf-8")
+        staged.rename(output)
+    print(f"KAI ORIGINAL | {output} | {media_info['duration_seconds']:.3f}s | human review pending")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("storyboard", type=Path)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--brand", type=Path, default=DEFAULT_BRAND)
+    parser.add_argument("--encoder", choices=ENCODERS, default="h264_nvenc")
+    parser.add_argument("--check", action="store_true", help="Read and validate independent scene data without rendering.")
+    try:
+        render(parser.parse_args())
+    except (OSError, RuntimeError, TypeError, ValueError, KeyError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+===== src/create_audio.py =====
+
+"""Prepare exact phrase and scene timing from Windows TTS or original recordings."""
+
+from array import array
+from pathlib import Path
+import subprocess
+import sys
+import wave
+
+from analysis_plan import json_text, require, required_text
+from media import run_media_tool
+from render import sha256
+from render_brand import FPS
+from render_commentary import SAMPLE_RATE
+
+SAMPLES_PER_FRAME = SAMPLE_RATE // FPS
+WAV_FORMAT = (1, 2, SAMPLE_RATE)
+DEFAULT_PAUSE_MS = 110
+RIGHTS = {"owned", "licensed", "permission-granted"}
+
+
+def local_asset(base, item, label):
+    path = (base / required_text(item["file"], label)).resolve()
+    require(path.is_file(), f"{label} is missing: {path}")
+    require(item["rights"] in RIGHTS, f"Record confirmed rights for {label}: {path}")
+    required_text(item["rights_note"], f"{label} rights note")
+    require(type(item["ai_generated"]) is bool, f"Declare AI status for {label}.")
+    return path
+
+
+def speech_wav(source, target, clip):
+    trim = []
+    if clip is not None:
+        start, end = clip
+        require(type(start) is int and type(end) is int and 0 <= start < end, "Invalid recording clip_ms.")
+        trim = ["-af", f"atrim=start={start / 1000:.3f}:end={end / 1000:.3f},asetpts=PTS-STARTPTS"]
+    run_media_tool([
+        "ffmpeg", "-v", "error", "-xerror", "-nostdin", "-n", "-i", str(source),
+        "-map", "0:a:0", *trim, "-ar", str(SAMPLE_RATE), "-ac", "1", "-c:a", "pcm_s16le", str(target),
+    ])
+    if clip is not None:
+        with wave.open(str(target), "rb") as audio:
+            require(abs(audio.getnframes() - (end - start) * SAMPLE_RATE // 1000) <= 960,
+                    f"Recording ends before the specified clip: {source}")
+
+
+def voiced_pcm(path):
+    with wave.open(str(path), "rb") as audio:
+        actual_format = (audio.getnchannels(), audio.getsampwidth(), audio.getframerate())
+        require(actual_format == WAV_FORMAT, f"Unexpected narration WAV format: {path}")
+        pcm = audio.readframes(audio.getnframes())
+    samples = array("h")
+    samples.frombytes(pcm)
+    if sys.byteorder != "little":
+        samples.byteswap()
+    window = SAMPLE_RATE // 100
+    active = []
+    for index in range(0, len(samples), window):
+        block = samples[index:index + window]
+        if sum(sample * sample for sample in block) >= 110 ** 2 * len(block):
+            active.append(index)
+    require(len(active) >= 8, f"No usable speech in {path}. Supply an audible recording or another local voice.")
+    # Keep quiet consonants just outside the measured energy span. Internal pauses stay intact.
+    start = max(0, active[0] - 4 * window)
+    end = min(len(samples), active[-1] + 5 * window)
+    return pcm[2 * start:2 * end]
+
+
+def prepare_audio(plan, base, directory):
+    config = plan["voice"]
+    mode = config["mode"]
+    parts = [cue for scene in plan["scenes"] for cue in scene["narration"]]
+    voice = {"mode": mode}
+    if mode == "windows-tts":
+        voice_name = required_text(config["voice"], "Windows voice")
+        rate = config.get("rate", 0)
+        require(type(rate) is int and -10 <= rate <= 10, "Windows speech rate must be an integer from -10 to 10.")
+        request = directory / "tts.json"
+        request.write_text(json_text({
+            "voice": voice_name, "rate": rate, "parts": [part["spoken"] for part in parts],
+        }), encoding="utf-8")
+        script = Path(__file__).with_name("create_voice.ps1").resolve()
+        result = subprocess.run([
+            "powershell.exe", "-NoProfile", "-NonInteractive", "-File", str(script), str(request), str(directory),
+        ], capture_output=True, text=True, encoding="utf-8", errors="replace")
+        require(result.returncode == 0, f"Chinese TTS failed. Use a working Windows voice or import original recordings.\n{result.stderr}")
+        voice.update(engine="Windows System.Speech", voice=voice_name, rate=rate)
+
+    def ms(sample):
+        return round(sample * 1000 / SAMPLE_RATE)
+
+    cursor = 0
+    part_index = 0
+    input_hashes = {}
+    timeline = []
+    with wave.open(str(directory / "narration.wav"), "wb") as joined:
+        joined.setnchannels(1)
+        joined.setsampwidth(2)
+        joined.setframerate(SAMPLE_RATE)
+        for scene in plan["scenes"]:
+            scene_start = cursor
+            cues = []
+            for cue in scene["narration"]:
+                if mode == "windows-tts":
+                    wav = directory / f"tts-{part_index:04}.wav"
+                else:
+                    source = local_asset(base, cue["recording"], "recording")
+                    if source not in input_hashes:
+                        input_hashes[source] = sha256(source)
+                    wav = directory / "converted-voice.wav"
+                    speech_wav(source, wav, cue["recording"].get("clip_ms"))
+                pcm = voiced_pcm(wav)
+                count = len(pcm) // 2
+                require(count >= SAMPLE_RATE // 5, f"Speech cue is too short: {cue['spoken']}")
+                joined.writeframesraw(pcm)
+                end = cursor + count
+                cues.append(dict(text=cue.get("subtitle", cue["spoken"]), start_ms=ms(cursor), end_ms=ms(end),
+                                 start_sample=cursor, end_sample=end))
+                pause = cue.get("pause_ms", DEFAULT_PAUSE_MS)
+                require(type(pause) is int and 0 <= pause <= 600, "Cue pause_ms must be an integer between 0 and 600.")
+                silence = pause * SAMPLE_RATE // 1000
+                joined.writeframesraw(b"\0\0" * silence)
+                cursor = end + silence
+                if mode == "recording":
+                    wav.unlink()
+                part_index += 1
+            frame_padding = -cursor % SAMPLES_PER_FRAME
+            joined.writeframesraw(b"\0\0" * frame_padding)
+            cursor += frame_padding
+            timeline.append(dict(
+                start_frame=scene_start // SAMPLES_PER_FRAME, end_frame=cursor // SAMPLES_PER_FRAME,
+                start_ms=ms(scene_start), end_ms=ms(cursor), cues=cues,
+            ))
+    voice["recording_sha256"] = {str(path): checksum for path, checksum in input_hashes.items()}
+    voice["timing"] = "Energy crop with 40 ms guard on each phrase, then measured PCM samples; no word-level timing."
+    return timeline, voice
+
+===== src/create_visuals.py =====
+
+"""Compose data-driven original scenes on the Kai portrait canvas."""
+
+from analysis_plan import require
+from render_brand import HEIGHT, WIDTH
+from render_subtitles import ass_color, block_height, events_for_block, fit_text, timestamp
+
+
+def area(x, y, w, h):
+    return dict(x=x, y=y, w=w, h=h)
+
+
+def captions(brand, cues, offset_ms=0):
+    safe = brand["platform_ui_reserve"]
+    x = safe["left"] + 16
+    right = WIDTH - safe["right"] - 16
+    bottom = HEIGHT - safe["bottom"] - 32
+    box = area(x, bottom - 130, right - x, 130)
+    events = []
+    for cue in cues:
+        style = {**brand["styles"]["Chinese"], "width_factor": 1.0}
+        block = fit_text(cue["text"], box, style, preferred_lines=2)
+        require(len(block["lines"]) <= 2 and block_height(block) <= box["h"],
+                f"Split this subtitle into shorter spoken cues: {cue['text']}")
+        for line in events_for_block("Chinese", box, cue["start_ms"] - offset_ms,
+                                     cue["end_ms"] - offset_ms, block):
+            events.append(line.replace("Dialogue: 0,", "Dialogue: 2,", 1)
+                          .replace(r"{\an7", r"{\an7\bord4\shad0", 1))
+    return events
+
+
+def asset_region(brand):
+    safe = brand["platform_ui_reserve"]
+    x = safe["left"] + 16
+    return area(x, 490, WIDTH - safe["right"] - 10 - x, HEIGHT - safe["bottom"] - 760)
+
+
+def scene_events(brand, visual, duration_ms, disclosure, *, cover=False, draft=False):
+    safe, colors = brand["platform_ui_reserve"], brand["colors"]
+    left = safe["left"] + 16
+    right = WIDTH - safe["right"] - 10
+    width = right - left
+    end = timestamp(duration_ms)
+    events = []
+
+    def rect(x, y, w, h, color, alpha="00"):
+        if w <= 0 or h <= 0:
+            return
+        fill = ass_color(color)[4:]
+        tags = rf"{{\an7\pos({x},{y})\p1\bord0\shad0\1c&H{fill}&\1a&H{alpha}&}}"
+        shape = f"m 0 0 l {w} 0 {w} {h} 0 {h}"
+        events.append(f"Dialogue: 0,0:00:00.00,{end},Brand,,0,0,0,,{tags}{shape}\n")
+
+    def text(value, x, y, w, style_name, size, lines=1, color=None):
+        if not value:
+            return
+        style = {**brand["styles"][style_name], "size": size, "line_height": round(size * 1.22), "width_factor": 1.0}
+        box = area(x, y, w, round(size * 1.22) * lines)
+        block = fit_text(value, box, style, preferred_lines=lines)
+        require(len(block["lines"]) <= lines, f"Shorten this scene text or split it across lines: {value}")
+        for event in events_for_block(style_name, box, 0, duration_ms, block):
+            if color:
+                event = event.replace(r"{\an7", rf"{{\an7\1c&H{ass_color(colors[color])[4:]}&", 1)
+            events.append(event.replace("Dialogue: 0,", "Dialogue: 1,", 1))
+
+    def line(y, alpha="A0"):
+        rect(left, y, width, 2, colors["accent"], alpha)
+
+    kind = visual["kind"]
+    top = max(safe["top"] + 16, 298 if cover else 156)
+    text("KAI", left, top, width // 2, "Brand", 34)
+    if draft:
+        text("方法演示草稿", right - 273, top + 3, 273, "Brand", 26)
+    if disclosure:
+        text(disclosure, right - 273, top + (37 if draft else 5), 273, "Brand", 26, color="secondary")
+    line(top + (80 if draft else 63), "45")
+    text(visual.get("label"), left, top + 116, width, "CardLabel", 32)
+
+    if kind == "title":
+        text(visual["title"], left, top + 188, width, "CoverTitle", 100, 3)
+        band_y = top + (555 if cover else 665)
+        rect(left, band_y, width, 298, colors["accent"])
+        text(visual["headline"], left + 34, band_y + 38, width - 68, "CardText", 66, 2, "background")
+        text(visual.get("detail"), left + 36, band_y + 222, width - 72, "Brand", 32, 1, "background")
+        text(visual.get("footer"), left, band_y + 353, width, "Brand", 31, 2, "secondary")
+        return events
+
+    text(visual["title"], left, top + 183, width, "Title", 64, 2)
+    content_y = top + 350
+    if kind == "chart":
+        bars = visual["bars"]
+        require(1 <= len(bars) <= 3, "A chart needs one to three bars.")
+        spacing = 255 if len(bars) < 3 else 215
+        for index, bar in enumerate(bars):
+            value = bar["value"]
+            require(type(value) in (int, float) and 0 <= value <= 100, "Chart values must be percentages from 0 to 100.")
+            y = content_y + index * spacing
+            text(bar["label"], left, y + 29, width - 247, "Chinese", 39, 2)
+            text(f"{value:g}%", right - 236, y, 236, "Title", 63, color="accent")
+            rect(left, y + 119, width, 38, colors["secondary"], "C0")
+            rect(left, y + 119, round(width * value / 100), 38, colors["accent"], "42" if index == 0 else "00")
+        foot_y = content_y + len(bars) * spacing + 15
+
+    elif kind == "table":
+        columns, rows = visual["columns"], visual["rows"]
+        require(2 <= len(columns) <= 4 and 1 <= len(rows) <= 6
+                and all(len(row) == len(columns) for row in rows), "Use 2–4 columns and 1–6 matching rows.")
+        weights = visual.get("column_weights", [1] * len(columns))
+        require(len(weights) == len(columns) and all(type(item) is int and item > 0 for item in weights),
+                "Column weights must be positive integers, one per column.")
+        widths = [width * weight // sum(weights) for weight in weights]
+        row_height = min(119, 590 // (len(rows) + 1))
+        highlight = set(visual.get("highlight_rows", []))
+        require(all(type(index) is int and 1 <= index <= len(rows) for index in highlight),
+                "Highlight rows use 1-based indexes.")
+        for index, row in enumerate([columns, *rows]):
+            y = content_y + index * row_height
+            if index == 0 or index in highlight:
+                rect(left, y, width, row_height, colors["accent"], "C8" if index == 0 else "DC")
+            line(y + row_height - 1, "C0")
+            x = left
+            for cell, cell_width in zip(row, widths, strict=True):
+                text(cell, x + 15, y + 19, cell_width - 27, "Chinese", 34 if index == 0 else 39,
+                     1, "accent" if index == 0 or index in highlight else None)
+                x += cell_width
+        foot_y = content_y + (len(rows) + 1) * row_height + 45
+
+    elif kind == "conclusion":
+        line(content_y)
+        items = visual["items"]
+        require(1 <= len(items) <= 3, "A conclusion needs one to three takeaways.")
+        for index, item in enumerate(items):
+            y = content_y + 49 + index * 200
+            rect(left, y + 5, 7, 112, colors["accent"])
+            text(item, left + 33, y, width - 44, "CardText", 57, 2)
+        foot_y = content_y + 49 + len(items) * 200 - 15
+
+    elif kind in {"image", "video"}:
+        region = asset_region(brand)
+        foot_y = region["y"] + region["h"] + 20
+
+    else:
+        raise ValueError(f"Unknown visual kind: {kind}")
+
+    text(visual.get("footer"), left, foot_y, width, "Brand", 30, 2, "secondary")
+    return events
+
+===== src/create_voice.ps1 =====
+
+param(
+    [Parameter(Mandatory = $true)][string]$Request,
+    [Parameter(Mandatory = $true)][string]$Directory
+)
+
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Speech
+$job = Get-Content -LiteralPath $Request -Raw -Encoding UTF8 | ConvertFrom-Json
+$synth = [System.Speech.Synthesis.SpeechSynthesizer]::new()
+try {
+    $synth.SelectVoice($job.voice)
+    if ($synth.Voice.Culture.Name -notlike 'zh-*') {
+        throw "The selected Windows voice is not Chinese."
+    }
+    $synth.Rate = $job.rate
+    $format = [System.Speech.AudioFormat.SpeechAudioFormatInfo]::new(
+        48000, [System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen,
+        [System.Speech.AudioFormat.AudioChannel]::Mono
+    )
+    for ($index = 0; $index -lt $job.parts.Count; $index++) {
+        $name = 'tts-{0:D4}.wav' -f $index
+        $synth.SetOutputToWaveFile((Join-Path $Directory $name), $format)
+        $synth.Speak([string]$job.parts[$index])
+        $synth.SetOutputToNull()
+    }
+    $synth.Voice.Name
+} finally {
+    $synth.Dispose()
+}
+
+===== .agents/skills/kai-create/SKILL.md =====
+
+---
+name: kai-create
+description: Produce an original Chinese vertical video for Kai's B line from a specified P5 topic. Use to write narration, build a storyboard, prepare local Mandarin audio, render, and review a release candidate.
+---
+
+# Kai 原创视频生产
+
+在项目根目录读取 `AGENTS.md` 和 `STATUS.md`。从指定研究任务的 `topics.json` 提取对应 B 线条目，核对 `production_state=ready` 和素材权利。只补读脚本实际引用的一手依据。按真实进度记录选题状态。
+
+1. 写原创脚本，明确开场、证据、演示和结论。将文献结论、已完成的实测和编辑判断分别准确归因。实测先冻结提示、预期和评分规则，再收集独立的真实回复。保留完整原始记录。只有方法可演示时将 `mode` 设为 `method-demo-draft`，画面会显示草稿标识。
+2. 新建 `workspace/任务名/`，将脚本、场景、来源和授权写入 `storyboard.json`。把简明事实与实测摘要保存为相对路径的 Markdown。场景和音频字段见 [场景数据格式](references/storyboard.md)。
+3. 优先检查本机中文 Windows 语音。把 `narration` 切为完整短句，`spoken` 用实际发音写法，`subtitle` 可保留数字等书面形式。语音质量不足时，填入用户自有录音或每句在整段录音中的已校对时间。音频缺失或不可听时报告阻塞。
+4. 校验后渲染到新目录。默认 Kai 黑金、1080×1920、30 FPS、NVENC H.264 和 AAC。合成配音要标记 AI 生成内容。
+
+```powershell
+.\.venv\Scripts\python.exe src/create.py 'workspace/任务名/storyboard.json' --check
+.\.venv\Scripts\python.exe src/create.py 'workspace/任务名/storyboard.json' --output 'output/新成品目录'
+ffmpeg -v error -xerror -nostdin -i 'output/新成品目录/video.mp4' -map 0:v:0 -map 0:a:0 -f null NUL
+```
+
+检查开头、图表、表格、结尾及三张关键帧。用实际音频核对字幕文本、短句边界和结尾有声。交付视频、封面、场景方案、ASS、渲染清单、事实与实测摘要。完成选题准备后可记录 `selected`，实际产生并验证发布候选后可记录 `produced`。人工审核状态保持待确认，发布由用户执行。
+
+===== .agents/skills/kai-create/references/storyboard.md =====
+
+# 原创场景数据格式 V1
+
+`src/create.py` 读取 UTF-8 JSON。场景和句子按数组顺序播放。脚本、数字、标题、颜色配置和素材都可独立更换。
+
+| 顶层字段 | 用法 |
+| --- | --- |
+| `schema_version` | `1` |
+| `topic_id`, `title` | 选题唯一 ID 与封面标题 |
+| `mode` | `release-candidate` 或 `method-demo-draft` |
+| `ai_generated`, `ai_note` | 布尔标识。值为真时写明哪些内容涉及 AI |
+| `voice` | `{"mode":"windows-tts","voice":"Microsoft Huihui Desktop","rate":1}`，或 `{"mode":"recording"}` |
+| `evidence` | 故事板目录下的 Markdown 路径，写事实和实测摘要 |
+| `sources` | 数组，条目含 `title`、`url`、`use`。无外部事实时可为空 |
+| `materials` | 非空数组，条目含 `description`、`origin`、`rights`、`rights_note`、`ai_generated` |
+| `scenes` | 条目含唯一 `id`、一个 `visual` 对象和非空 `narration` 数组 |
+| `review_scene_ids` | 可选，1 到 3 个场景 ID，按指定顺序出视频帧 |
+
+每个 `visual` 有 `kind`、`title`，可加 `label`、`footer`。同种场景可出现多次。长标题或表格应先运行 `--check`。
+
+| 类型 | 字段 |
+| --- | --- |
+| `title` | 首个场景必用。必填 `headline`，可加 `detail` |
+| `chart` | `bars` 含 1 到 3 个 `{"label":"条目","value":85.8}`，单位为百分比 |
+| `table` | `columns` 为 2 到 4 个文字列名，`rows` 为 1 到 6 行文字数组。可给 `column_weights` 正整数数组和 `highlight_rows` 行号数组（从 1 起） |
+| `conclusion` | `items` 含 1 到 3 条简短结论 |
+| `image` / `video` | `asset` 声明已授权的本地图片或录屏。录屏从头播放，短素材定格末帧，声音使用独立口播 |
+
+`narration` 每条填 `spoken`。可设 `subtitle` 以数字等书面写法匹配实际口播，默认使用 `spoken`。短句之间可设整数 `pause_ms`，默认 110 毫秒。录音模式每条另填 `recording`。可提交一句一个文件，或在同一文件上用 `clip_ms:[开始,结束]` 声明人工校对的范围。素材和录音记录均包含 `file`、`rights`、`rights_note`、`ai_generated`。相对路径从输入故事板所在目录解析。授权值为 `owned`、`licensed` 或 `permission-granted`。
+
+场景片段随口播样本长度生成，补齐到视频帧边界。产物 `storyboard.json` 记录每场及每句样本或毫秒边界，`subtitles.ass` 提供中文字幕。精确到逐词的时间需另有实测依据。产物故事板是审核快照，重制用原始故事板与其相对路径素材。
+
+===== 本次独立输入故事板 =====
+
+{
+  "schema_version": 1,
+  "topic_id": "p5-2026-11-26:ai-reliability-repeat-test",
+  "title": "AI 答对一次，就值得信任吗？",
+  "mode": "release-candidate",
+  "ai_generated": true,
+  "ai_note": "Windows 本地普通话合成配音，Codex 协助撰稿并生成测试回复，画面持续显示「含 AI 生成内容」。",
+  "voice": {
+    "mode": "windows-tts",
+    "voice": "Microsoft Huihui Desktop",
+    "rate": 1
+  },
+  "evidence": "facts-and-test.md",
+  "sources": [
+    {
+      "title": "Google DeepMind HFE 发布公告（2026-11-24）",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/humanitys-first-exam/",
+      "use": "研究目的及数据集规模。"
+    },
+    {
+      "title": "Humanity’s First Exam 技术报告表 3、表 4（2026-11-24）",
+      "url": "https://storage.googleapis.com/deepmind-media/papers/hfe_tech_paper.pdf",
+      "use": "按四个提示各重复四次定义两项概率。前五个模型的十六次全对估计概率为 92.4%、86.9%、85.8%、83.4%、80.5%，算术平均 85.8%；至少一次全组中的回答正确均为 100%。"
+    }
+  ],
+  "materials": [
+    {
+      "description": "报价单、研究图表、四问结果表和结论版式",
+      "origin": "项目自制报价、依据论文数据自绘的图表及原创排版",
+      "rights": "owned",
+      "rights_note": "仅复用论文公开数值，图形和视觉自行编制。",
+      "ai_generated": true
+    },
+    {
+      "description": "原创中文口播及音频",
+      "origin": "Kai 原创脚本和本机 Windows Microsoft Huihui Desktop 合成",
+      "rights": "owned",
+      "rights_note": "项目原创文本与本地生成录音。",
+      "ai_generated": true
+    },
+    {
+      "description": "模拟业务问法及实测回复",
+      "origin": "Kai 自制四条等价问法和指定 Codex 模型的真实文本",
+      "rights": "owned",
+      "rights_note": "使用虚构报价数据，结果表使用自主评分记录。",
+      "ai_generated": true
+    }
+  ],
+  "review_scene_ids": [
+    "hfe",
+    "results",
+    "takeaway"
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "visual": {
+        "kind": "title",
+        "label": "原创实测",
+        "title": "AI 答对一次，就值得信任吗？",
+        "headline": "同一张报价单，换四种问法",
+        "detail": "固定模型 · 独立会话 · 统一判分"
+      },
+      "narration": [
+        {
+          "spoken": "人工智能把一张报价单算对了。",
+          "subtitle": "AI 把一张报价单算对了。"
+        },
+        {
+          "spoken": "下次换种问法，你还敢照着付吗？"
+        },
+        {
+          "spoken": "我用一张自制报价单，试了四次。"
+        }
+      ]
+    },
+    {
+      "id": "hfe",
+      "visual": {
+        "kind": "chart",
+        "label": "HFE 论文｜前五名模型",
+        "title": "至少答对一次，和次次都对",
+        "bars": [
+          {
+            "label": "至少答对一次",
+            "value": 100
+          },
+          {
+            "label": "十六次全部答对（平均）",
+            "value": 85.8
+          }
+        ],
+        "footer": "每组 4 个提示 × 每个 4 次。前五模型的估计概率。"
+      },
+      "narration": [
+        {
+          "spoken": "谷歌的一项研究，把四个相近的问题编成一组。"
+        },
+        {
+          "spoken": "每题答四次，一组就是十六次。"
+        },
+        {
+          "spoken": "前五个模型，至少答对一次的估计概率都是百分之百。",
+          "subtitle": "前五个模型，至少答对一次的估计概率都是 100%。"
+        },
+        {
+          "spoken": "十六次全对，平均是百分之八十五点八。",
+          "subtitle": "16 次全对，平均是 85.8%。"
+        }
+      ]
+    },
+    {
+      "id": "quote",
+      "visual": {
+        "kind": "table",
+        "label": "自制虚构报价单｜人民币",
+        "title": "折扣和税算在哪一项？",
+        "columns": [
+          "项目",
+          "数量",
+          "单价 / 金额"
+        ],
+        "column_weights": [
+          4,
+          2,
+          4
+        ],
+        "rows": [
+          [
+            "安装服务",
+            "2",
+            "¥1,250.00"
+          ],
+          [
+            "配置服务",
+            "3",
+            "¥680.00"
+          ],
+          [
+            "配送费",
+            "—",
+            "¥180.00"
+          ],
+          [
+            "单上应付",
+            "—",
+            "¥4,754.40"
+          ]
+        ],
+        "highlight_rows": [
+          4
+        ],
+        "footer": "安装打九折。两项服务折后计税 6%。配送费不计税。"
+      },
+      "narration": [
+        {
+          "spoken": "回到这张报价单。只有安装费打九折。"
+        },
+        {
+          "spoken": "两项服务折后额按百分之六计税。",
+          "subtitle": "两项服务折后额按 6% 计税。"
+        },
+        {
+          "spoken": "配送费最后加。"
+        },
+        {
+          "spoken": "我先定标准答案，再固定模型和设置。"
+        },
+        {
+          "spoken": "同一道题换四种问法，每次从新会话开始。"
+        }
+      ]
+    },
+    {
+      "id": "results",
+      "visual": {
+        "kind": "table",
+        "label": "报价单四问｜实测记录",
+        "title": "四轮，全部通过",
+        "columns": [
+          "问法",
+          "结果",
+          "单上差额"
+        ],
+        "column_weights": [
+          4,
+          3,
+          4
+        ],
+        "rows": [
+          [
+            "复核单据",
+            "4 项全对",
+            "高估 ¥27.00"
+          ],
+          [
+            "付款核对",
+            "4 项全对",
+            "高估 ¥27.00"
+          ],
+          [
+            "供应商验收",
+            "4 项全对",
+            "高估 ¥27.00"
+          ],
+          [
+            "重新结算",
+            "4 项全对",
+            "高估 ¥27.00"
+          ]
+        ],
+        "highlight_rows": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "footer": "人工标准应付 ¥4,727.40。印刷金额高估 ¥27.00。"
+      },
+      "narration": [
+        {
+          "spoken": "这四种问法，这次全部通过。"
+        },
+        {
+          "spoken": "我逐项核对小计、税额、应付和差额。"
+        },
+        {
+          "spoken": "标准应付四千七百二十七元四角。",
+          "subtitle": "标准应付 4,727.40 元。"
+        },
+        {
+          "spoken": "单子多了二十七元。",
+          "subtitle": "单子多了 27 元。"
+        }
+      ]
+    },
+    {
+      "id": "takeaway",
+      "visual": {
+        "kind": "conclusion",
+        "label": "下一张单，也可以这样验",
+        "title": "先写标准，再看模型",
+        "items": [
+          "人工核定关键字段",
+          "换问法，用新会话",
+          "关键字段出错就留人工复核"
+        ],
+        "footer": "报价单结果仅覆盖这张单和这四轮。"
+      },
+      "narration": [
+        {
+          "spoken": "一张单的结果，不能推到日常付款。"
+        },
+        {
+          "spoken": "下次先定验收项，再独立换问法。"
+        },
+        {
+          "spoken": "关键字段只要错一次，就保留人工复核。"
+        }
+      ]
+    }
+  ]
+}
+
+===== 冻结标准与判分规则 =====
+
+{
+  "quote": "自制虚构报价单 K-026（人民币）\n项目｜数量｜未税单价\n安装服务｜2｜1250.00\n配置服务｜3｜680.00\n折扣：仅安装服务打九折。\n税：两项服务折后未税小计按 6% 计税，税额四舍五入到分。\n配送费 180.00 元，最后加计，不计税。\n报价单上印的应付金额：4754.40 元。",
+  "answer": {
+    "net": "4290.00",
+    "tax": "257.40",
+    "payable": "4727.40",
+    "printed_difference": "高估 27.00"
+  },
+  "calculation": "2×1250×0.9 + 3×680 = 4290.00；4290.00×6% = 257.40；4290.00+257.40+180.00 = 4727.40；4754.40−4727.40 = 27.00。",
+  "scoring": "每轮按未税小计、税额、应付、差额（方向与金额均对）四项各一分。四项全对为该轮通过。关键算式用于核对过程。",
+  "questions": [
+    "请根据报价规则复核这张单据。给出两项服务折后未税小计、服务税额、实际应付金额、印刷金额高估或低估及差额。列出关键算式，金额保留两位小数。",
+    "这张单要付款了。把正确的含配送应付金额算出来，同时列出服务折后未税小计和服务税额，再说明单据上的应付数偏高还是偏低、相差多少。列出关键算式，金额保留两位小数。",
+    "假设你在验收供应商的报价：单据应付数是否正确？请用它和正确应付数比较，写清高低方向与差额，并报两项服务折后未税小计、服务税额和正确应付数。列出关键算式，金额保留两位小数。",
+    "按折扣、计税和配送规则重新结算这张报价单，再核对印出来的总额。交付四项结果：服务折后未税小计、服务税额、正确应付额、印刷金额偏高还是偏低及差额。列出关键算式，金额保留两位小数。"
+  ]
+}
+
+===== 第 1 轮完整提示和回复 =====
+
+实际提示
+
+自制虚构报价单 K-026（人民币）
+项目｜数量｜未税单价
+安装服务｜2｜1250.00
+配置服务｜3｜680.00
+折扣：仅安装服务打九折。
+税：两项服务折后未税小计按 6% 计税，税额四舍五入到分。
+配送费 180.00 元，最后加计，不计税。
+报价单上印的应付金额：4754.40 元。
+
+请根据报价规则复核这张单据。给出两项服务折后未税小计、服务税额、实际应付金额、印刷金额高估或低估及差额。列出关键算式，金额保留两位小数。
+直接回答。不使用工具或外部资料。
+
+实际完整回复
+
+老板，K-026 的实际应付金额为 **4,727.40 元**，印刷金额高估了 **27.00 元**。
+
+| 核算项目 | 算式 | 金额（元） |
+|---|---|---:|
+| 安装服务折后未税小计 | 2 × 1,250.00 × 90% | 2,250.00 |
+| 配置服务未税小计 | 3 × 680.00 | 2,040.00 |
+| 两项服务折后未税小计 | 2,250.00 + 2,040.00 | 4,290.00 |
+| 服务税额 | 4,290.00 × 6%，四舍五入到分 | 257.40 |
+| 实际应付金额 | 4,290.00 + 257.40 + 180.00 | 4,727.40 |
+| 印刷金额高估差额 | 4,754.40 − 4,727.40 | 27.00 |
+
+===== 第 2 轮完整提示和回复 =====
+
+实际提示
+
+自制虚构报价单 K-026（人民币）
+项目｜数量｜未税单价
+安装服务｜2｜1250.00
+配置服务｜3｜680.00
+折扣：仅安装服务打九折。
+税：两项服务折后未税小计按 6% 计税，税额四舍五入到分。
+配送费 180.00 元，最后加计，不计税。
+报价单上印的应付金额：4754.40 元。
+
+这张单要付款了。把正确的含配送应付金额算出来，同时列出服务折后未税小计和服务税额，再说明单据上的应付数偏高还是偏低、相差多少。列出关键算式，金额保留两位小数。
+直接回答。不使用工具或外部资料。
+
+实际完整回复
+
+老板，正确的含配送应付金额是 **4,727.40 元**。单据上印的 **4,754.40 元**偏高 **27.00 元**。
+
+- 安装服务折后金额：2 × 1,250.00 × 90% = 2,250.00 元
+- 配置服务金额：3 × 680.00 = 2,040.00 元
+- **服务折后未税小计**：2,250.00 + 2,040.00 = **4,290.00 元**
+- **服务税额**：4,290.00 × 6% = **257.40 元**
+- 含配送应付金额：4,290.00 + 257.40 + 180.00 = **4,727.40 元**
+- 单据差额：4,754.40 − 4,727.40 = **27.00 元**
+
+===== 第 3 轮完整提示和回复 =====
+
+实际提示
+
+自制虚构报价单 K-026（人民币）
+项目｜数量｜未税单价
+安装服务｜2｜1250.00
+配置服务｜3｜680.00
+折扣：仅安装服务打九折。
+税：两项服务折后未税小计按 6% 计税，税额四舍五入到分。
+配送费 180.00 元，最后加计，不计税。
+报价单上印的应付金额：4754.40 元。
+
+假设你在验收供应商的报价：单据应付数是否正确？请用它和正确应付数比较，写清高低方向与差额，并报两项服务折后未税小计、服务税额和正确应付数。列出关键算式，金额保留两位小数。
+直接回答。不使用工具或外部资料。
+
+实际完整回复
+
+老板，报价单应付金额不正确。单据印的是 **4754.40 元**，比正确应付金额 **4727.40 元**高 **27.00 元**。
+
+- 安装服务折后未税金额：2 × 1250.00 × 90% = 2250.00 元
+- 配置服务未税金额：3 × 680.00 = 2040.00 元
+- 两项服务折后未税小计：2250.00 + 2040.00 = **4290.00 元**
+- 服务税额：4290.00 × 6% = **257.40 元**
+- 正确应付金额：4290.00 + 257.40 + 180.00 = **4727.40 元**
+- 差额：4754.40 − 4727.40 = **27.00 元**
+
+===== 第 4 轮完整提示和回复 =====
+
+实际提示
+
+自制虚构报价单 K-026（人民币）
+项目｜数量｜未税单价
+安装服务｜2｜1250.00
+配置服务｜3｜680.00
+折扣：仅安装服务打九折。
+税：两项服务折后未税小计按 6% 计税，税额四舍五入到分。
+配送费 180.00 元，最后加计，不计税。
+报价单上印的应付金额：4754.40 元。
+
+按折扣、计税和配送规则重新结算这张报价单，再核对印出来的总额。交付四项结果：服务折后未税小计、服务税额、正确应付额、印刷金额偏高还是偏低及差额。列出关键算式，金额保留两位小数。
+直接回答。不使用工具或外部资料。
+
+实际完整回复
+
+老板，K-026 报价单的正确应付额为 **4,727.40 元**，印刷金额偏高 **27.00 元**。
+
+| 核对项目 | 关键算式 | 结果 |
+|---|---|---:|
+| 服务折后未税小计 | 2 × 1,250.00 × 90% + 3 × 680.00 | 4,290.00 元 |
+| 服务税额 | 4,290.00 × 6% | 257.40 元 |
+| 正确应付额 | 4,290.00 + 257.40 + 180.00 | 4,727.40 元 |
+| 印刷金额差额 | 4,754.40 − 4,727.40 | 偏高 27.00 元 |

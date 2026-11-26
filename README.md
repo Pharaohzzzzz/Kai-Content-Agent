@@ -1,6 +1,6 @@
 # Kai Content Agent
 
-Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染、P4 品牌视觉及 P5 日常选题研究。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
+Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染、P4 品牌视觉、P5 日常选题研究和 P6 原创视频生产。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
 
 ## Windows 环境
 
@@ -139,4 +139,19 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 | `topics.json` | 计算后的分数和排序、候选状态、证据、素材权利及 A/B 研究交接 |
 | `daily-brief.md` | 中文运营简报及推荐首选 |
 
-制作准入独立于分数。A 线须已有权利确认且本地文件可用。B 线可用原创图表、文字或其他合法素材准备制作。选题记录由候选开始，P5 仅交付研究和结构化方案。实际验收见 [P5 审核文本](P5-REVIEW.txt)。
+去重与有限候选名额优先保留通过制作准入的选题，同组内按原评分排序。待核实或待补素材的选题可保留为备选。A 线须已确认权利且本地文件可用。B 线可用原创图表、文字或其他合法素材准备制作。选题记录由候选开始。P5 实际验收见 [P5 审核文本](P5-REVIEW.txt)。
+
+## B 线原创中文视频
+
+在仓库的 Codex 会话中发送「使用 $kai-create 制作指定 P5 选题的原创中文视频」，并提供研究任务和选题 ID。Skill 读取研究交接、准备脚本与事实记录、调用本地渲染器并检查成片。已编好的独立场景方案可直接送入命令行。 [kai-create Skill](.agents/skills/kai-create/SKILL.md) · [场景数据格式](.agents/skills/kai-create/references/storyboard.md)
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 src/create.py 'workspace/p6-ai-reliability/storyboard.json' --check
+.\.venv\Scripts\python.exe -X utf8 src/create.py 'workspace/p6-ai-reliability/storyboard.json' --output 'output/新的成品目录'
+```
+
+场景按顺序使用标题、百分比图表、表格、结论或合法本地图片和录屏。沿用 Kai 黑金品牌配置和平台保守留边，默认输出 1080×1920、30 FPS、NVENC H.264 和 AAC。可用 `--encoder libx264` 切换 CPU 备用编码。
+
+配音可选已安装的 Windows 普通话语音。也可以提交自有录音，每句话一个文件，或指定每句在整段录音里的 `clip_ms`。字幕沿实际短句音频的样本边界放置。缺少可用配音时渲染报错。演示草稿和 AI 内容按故事板状态显示标识。
+
+交付 `video.mp4`、`cover.png`、带时间轴的 `storyboard.json`、`subtitles.ass`、`render_manifest.json`、`facts-and-test.md` 和复查关键帧。成片须由人工审核并手动发布。首条成片位于 `output/p6-ai-reliability/`。 [P6 审核文本](P6-REVIEW.txt)
