@@ -214,9 +214,13 @@ def match_topic(topic, prior):
     return None
 
 
+def topic_sort_key(row):
+    return row["production_state"] != READY, -row["score"], row["slug"]
+
+
 def rank_topics(topics, history, max_topics):
     kept, duplicates = [], []
-    for topic in sorted(topics, key=lambda row: (-row["score"], row["slug"])):
+    for topic in sorted(topics, key=topic_sort_key):
         current = [(prior, match_topic(topic, prior)) for prior in kept]
         previous = [(prior, match_topic(topic, prior)) for prior in history]
         hits = [(prior, reason) for prior, reason in current if reason]

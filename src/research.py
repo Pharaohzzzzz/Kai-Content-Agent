@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 from time import perf_counter
 
 from research_collect import SHANGHAI, collect_source, discovery, manual_rows, read_json
-from research_topics import READY, TOPIC_STATES, WEIGHTS, daily_brief, gemini_prompt, prepare_topic, rank_topics
+from research_topics import READY, TOPIC_STATES, WEIGHTS, daily_brief, gemini_prompt, prepare_topic, rank_topics, topic_sort_key
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -168,7 +168,7 @@ def validate(args):
     for rank, topic in enumerate(saved, start=1):
         if topic["rank"] != rank or any(topic[key] != value for key, value in expected[topic["topic_id"]].items()):
             raise ValueError(f"Topic doesn't match the validated draft: {topic['topic_id']}")
-    if saved != sorted(saved, key=lambda row: (-row["score"], row["slug"])):
+    if saved != sorted(saved, key=topic_sort_key):
         raise ValueError("Invalid topic ranking")
     recommendation = next((row["topic_id"] for row in saved if row["production_state"] == READY), None)
     if result["scoring_weights_percent"] != WEIGHTS or result["recommended_topic_id"] != recommendation:
