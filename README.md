@@ -130,7 +130,7 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 - 任务目录名须唯一。默认查看近 72 小时，近 7 天用 `--hours 168`。发布日仅有日期时保留日期精度。日期未知的条目可以留作线索，社区提交时间只代表社区记录。
 - 可用 `--manual <链接清单.json>` 补充用户或 Codex 提供的公开链接和短摘要，纯手工研究加 `--offline`。正文是否读到、发生超时及未接通入口会分别记录。首次试点的公开来源与权限见 [信息源注册表](config/research-sources.json)。
 - AIHOT 将作为未来优先的热点聚合入口，当前为 `pending` 且禁用采集及聚合数据导入。授权后按新版 REST 文档确认精选约 20 条、热点榜前十和个别事件详情的访问条件。 [API 文档](https://aihot.news/agent?tab=api) · [条款](https://aihot.news/terms)
-- 历史记录写入 `workspace/research-history.jsonl`。真实进度发生后用 `history <topic_id> <状态> --note <依据>` 更新。可选 `gemini-prompt <任务名>` 在本地生成提示词，用户可以手动提交，反馈仍须核查原始来源。
+- 历史记录写入 `workspace/research-history.jsonl`。真实进度发生后用 `history <topic_id> <状态> --note <依据>` 更新。已登记 P8 发布记录的选题由 P8 首次实际发布确认联动更新。可选 `gemini-prompt <任务名>` 在本地生成提示词，用户可以手动提交，反馈仍须核查原始来源。
 
 | 文件 | 内容 |
 | --- | --- |
@@ -169,3 +169,47 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 - 视频、封面、图文和安全留边采用 [平台配置](config/platforms.json) 的项目建议值。人工终审时核对实际客户端裁切、遮挡和 AI 标识声明。
 - `publish_manifest.json` 记录来源、权利、标识、文件与审核状态。技术预览、权利不明、重大事实风险或事实待核时，仅写出 `blocked` 清单并返回退出码 2。正常打包标为 `awaiting_human_review` 并返回 0，由用户终审并手动发布。
 - P7 本地样例位于 `output/p7-ai-reliability-publish/`。 [P7 审核文本](P7-REVIEW.txt)
+
+## P8 运营数据反馈
+
+在项目的 Codex 会话中发送「使用 $kai-review 导入最新运营数据，并生成本周账号复盘」，附上本地后台数据文件或其路径。复制 [CSV 录入模板](.agents/skills/kai-review/assets/metrics-template.csv) 填写。CLI 使用 Python 3.11 标准库。 [kai-review Skill](.agents/skills/kai-review/SKILL.md)
+
+```powershell
+$python = '.\.venv\Scripts\python.exe'
+& $python -X utf8 src/review.py register 'output/p7-ai-reliability-publish/publish_manifest.json' --category 'AI 实测'
+& $python -X utf8 src/review.py list
+# 用户确认实际发布后，使用上一步显示的 pub-… ID 和实际作品信息。
+& $python -X utf8 src/review.py confirm '<发布记录ID>' --confirmed-published --title '<实际上线标题>' --published-at '<实际时间，带 +08:00 等时区>' --work-id '<平台作品ID>'
+& $python -X utf8 src/review.py import 'workspace/最新运营数据.csv'
+& $python -X utf8 src/review.py report
+```
+
+### 发布记录
+
+- `register` 读取 P7 清单，按其中已有的平台和形式分别创建 `pending` 记录。可用 `--platform douyin|xiaohongshu` 和 `--format video|note` 筛选。记录含 A/B 线、人工指定的内容分类、选题或片段 ID、清单路径和哈希、对应成品及视频时长。相同清单、平台和形式重试会返回同一记录。
+- `confirm` 接受实际标题、带偏移的发布时间及 `--work-id` 或 `--url`。例如时间格式 `2026-11-26T15:30:00+08:00`。用 `--manual-minutes` 和 `--production-cost-cny` 添加工时和制作成本，只填写分配给该条发布记录的部分。还可用原确认参数重试以补齐工时、成本或作品链接。
+- 已有 P5 选题的发布明细保存在该选题的 `publications` 数组中，首次实际发布确认与 `produced → published` 一起写入原选题历史。各平台和形式可处于不同状态。无 P5 选题的 A 线按片段关联，存入 `workspace/p8-operations/publications.jsonl`。旧的 P5 `published` 状态本身没有平台明细，需登记并确认实际作品才可导入运营快照。
+
+### 数据录入
+
+每行对应一条已确认作品在一次采集时的后台累计值。使用 UTF-8 CSV 或同名字段的 JSONL。空白或 JSON 的 `null` 表示缺失，后台确认的零填写 0。每行需要发布记录 ID、采集时间和至少一个已知指标。
+
+| 字段 | 填法 |
+| --- | --- |
+| `publication_id`、`collected_at` | 本地发布记录 ID 和带时区偏移的 ISO 8601 采集时间 |
+| `view_metric`、`view_count` | 照录后台名，如「播放量」或「浏览量」。填写数量时必填指标名称 |
+| `likes`、`comments`、`saves`、`shares`、`new_followers` | 累计点赞、评论、收藏、分享、该作品新增粉丝 |
+| `completion_rate`、`avg_watch_seconds` | 视频适用。完播率可填 `0.42` 或 `42%`，平均观看时长填秒数 |
+| `impressions`、`qualified_inquiries` | 可选的曝光量及能归因到该作品的有效商业咨询数 |
+| `revenue_cny`、`additional_cost_cny` | 累计实收和制作成本之外的可归因费用，单位人民币元，最多两位小数 |
+| `metric_scope` | 可选，默认「作品累计」。仅填作品级累计指标。有不同流量范围或统计口径时，用精确、一致的标签区分 |
+
+同一发布 ID 及采集时刻的相同数据可以重复导入。冲突数据会报出行号并拒绝整批写入。累计快照存入 `workspace/p8-operations/snapshots.jsonl`。
+
+### 周报口径
+
+- 默认选北京时间本周发布的作品。可用 `--start YYYY-MM-DD --through YYYY-MM-DD` 指定含首尾的发布日期范围，用 `--as-of` 指定快照截止时间。期间发布且截至时刻有有效快照的作品计入有效样本。
+- 单条近况取截止时刻最新快照。分组比较按平台、形式、指标口径和发布后目标窗口进行，取各作品最接近目标的快照，同距取较早一笔。24、72、168 小时窗口分别允许偏差 6、12、24 小时，并显示实际发布后小时。累计快照逐笔保留，计算时每条作品每个窗口只用一笔。
+- 每万次播放／浏览新增粉丝、点赞率、收藏率及分享率仅在对应分子已知且分母为正时计算。同一分组按内容分类计算中位数，并给出各指标有效样本数。已知制作成本及额外成本时计算总成本，再结合已知收入计算净收益。
+- 报告写入 `workspace/p8-operations/reports/`。可用 `--name` 指定报告目录名。机器可读的 `review.json` 保留作品来源、最新快照、窗口明细和分组计算。Codex 按 Skill 用 `--editorial` 将注明依据的编辑判断写入 Markdown 与 JSON。运营建议保留给 GPT 或用户审核。
+- 模拟入口为 `src/review.py --simulate <子命令>`，台账、模拟清单及报告均在 `workspace/p8-simulation/`，记录 ID 以 `sim-` 开头。P8 验收与示例见 [P8 审核文本](P8-REVIEW.txt)。

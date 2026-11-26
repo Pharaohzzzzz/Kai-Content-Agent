@@ -1,0 +1,969 @@
+===== Kai Content Agent P8 审核交接 =====
+
+状态 P8 — AWAITING_GPT_REVIEW
+项目 D:\Desktop\Kai-Content-Agent
+P7 实际检查点 7b93cf4ea87e0ed367ed1c5a0e02f700f38b296a
+P7 直接父提交 4c601145eea8865c89d91cbefefdb0b0c5cef0bf
+开始 P8 时 git log -1 -- P7-REVIEW.txt 与 git rev-parse HEAD 返回同一 P7 检查点。
+P8 完整提交哈希见交付对话，也可在本地运行 git log -1 --format=%H -- P8-REVIEW.txt 核对。
+
+P7 正式审核为 PASS WITH LIMITATIONS。A 线仅完成接口兼容性检查。六张小红书图文卡片尚未经 GPT 独立目视审核。平台尺寸和安全区域属于项目建议值。事实、素材权利及平台实机检查仍需人工终审。
+
+===== 本次交付 =====
+
+P8 用 Python 3.11 标准库登记 P7 发布包，按平台和形式分别记录实际发布确认、标题、时间、作品 ID 或链接、工时与制作成本。据关联的 P5 选题保存发布明细，首次明确确认实际发布与 P5 状态联动。无选题的 A 线按 clip_id 关联。首次确认之前状态为 pending。纯本地手动 CSV／JSONL 支持作品级累计快照。各表字段、适用范围、报告期间、观察时间窗口、缺失处理及 CLI 用法见下附 README P8 正文。
+
+常用命令（在项目根目录，使用项目 .venv/Scripts/python.exe）。
+  python -X utf8 src/review.py register output/p7-ai-reliability-publish/publish_manifest.json --category "AI 实测"
+  python -X utf8 src/review.py list
+  python -X utf8 src/review.py import workspace/最新运营数据.csv
+  python -X utf8 src/review.py report
+实际发布确认使用 confirm <发布记录ID> --confirmed-published --title <实际标题> --published-at <带时区的实际时间> --work-id <平台作品ID>。也可用 --url。模拟前置参数为 --simulate。
+
+模板 .agents/skills/kai-review/assets/metrics-template.csv
+真实空数据复盘 workspace/p8-operations/reports/p8-empty/review.md 和 review.json
+模拟复盘 workspace/p8-simulation/reports/p8-demo/review.md 和 review.json
+模拟 CSV、清单和编辑稿位于 workspace/p8-simulation/，均标注模拟。真实运营文件与模拟运行目录均由 Git 忽略。
+
+===== 验收 A–D =====
+
+A. 真实 P7 待发布关联
+  publish_manifest.json SHA-256 为 236a08601200a2d11d10e2be94a200dfdba418460a783a550bbddb3f9480a2ed。
+  pub-douyin-video-236a08601200a2d1
+  pub-xiaohongshu-video-236a08601200a2d1
+  pub-xiaohongshu-note-236a08601200a2d1
+  三条均为 pending，实际发布时间为空。原 P7 清单字节保持一致。P5 选题 p5-2026-11-26:ai-reliability-repeat-test 保持 produced，历史仅补入该选题的发布明细。未提供明确确认标志时无法登记为已发布，待发布 ID 无法导入快照。
+
+B. 独立模拟验收
+  模拟 4 条发布、7 笔累计快照。对照覆盖抖音视频、小红书视频与小红书图文，共 5 组窗口比较。P5 状态联动在模拟历史验证，另有仅以 A 线片段关联的模拟发布。真实选题历史在模拟前后 SHA-256 一致，真实快照文件未创建。
+  抖音 24 小时组实际 24、26 小时。26 小时快照优先于同一作品的 20 小时快照，组内每万次新增粉中位数 70（n=2），分享率 2%（有效 n=1）。72 小时组的实际采集为 69 小时，1,600 播放、每万次新增 75 粉，点赞率 10%、收藏率 3.75%、分享率 2%，按 60 元模拟收入减 15 元模拟成本计算净收益 45 元。
+  7 天图文组实际采集为 166 小时。小红书视频在播放量为 0 时不产生比率，已知的 0 完播率仍保留。空白字段保持为 null。UTC 等价时间的 JSONL 快照重复导入为 0 条，冲突、图文误填视频指标及模拟 CSV 导入真实账本均被拒绝。重新导入后的模拟快照与首次通过时字节一致。
+
+C. 真实空数据复盘
+  报告含 3 条待发布、本期实际发布 0 条、有效作品 0 条、累计快照 0 条，明确显示「暂无有效运营样本」。
+
+D. 模拟复盘示例
+  生成带模拟标记的 Markdown 与 JSON，并用同一计算版本的作品 ID 为六项编辑判断标注依据。包括涨粉、收藏与分享、视频节奏线索、人工成本、商业转化和后续验证方向。模拟结果没有用于实际选题评分。
+
+Skill 发现检查。安装的 Codex CLI 0.171.0 用 app-server skills/list 返回 kai-review，scope=repo，enabled=true。
+P8 验收范围为上述 A–D 与 Skill 发现检查，无实际上传或发布。沿用现有 P7 包与 P5 历史，未重做历史研究、四问实验、语音识别、视频渲染或完整回归。
+
+===== 已知限制 =====
+
+真实后台数据、商业归因和真实 A 线发布记录仍无样本。A 线登记只在模拟数据中验证，P7 原审核限制延续。
+平台指标名、流量范围和费用归因依赖人工填写。每个目标窗口允许采集偏差，比较报告提供实际小时和样本数量。缺少实际收入或完整成本时净收益留空。
+样例只演示计算和报告。正式编辑判断由 Codex 根据当期真实数据生成，不能从少量观察或平均观看时长定位掉点或作因果证明。平台作品 ID 或链接可能采用多种表示，同一实际作品尽量沿用同一作品 ID。发布包重新打包可能产生新清单及新的待发布记录。
+
+===== 耗时与 Token =====
+
+会话启动至生成审核文本约 745 秒。A–D 验收 3.037 秒。
+当前会话用量采样 2026-11-26T02:32:27.599Z。输入 2,102,274，其中缓存输入 2,003,456。输出 31,492，其中推理 5,605。合计 2,133,766 tokens。
+用量为本会话截至采样点的累计值，含缓存和重复上下文。提交与交付收尾发生在此采样之后。
+
+===== workspace/p8-operations/reports/p8-empty/review.md =====
+
+# Kai 运营复盘
+
+发布批次 2026-11-23 至 2026-11-29，北京时间。数据截至 2026-11-26T10:30:51+08:00。
+
+## 记录事实
+
+台账待发布 3 条。本期确认发布 0 条，其中 0 条有指标，符合时间范围的累计快照共 0 条。
+
+暂无有效运营样本。
+
+===== workspace/p8-operations/reports/p8-empty/review.json =====
+
+{
+  "schema_version": 1,
+  "data_mode": "real",
+  "period": {
+    "start": "2026-11-23",
+    "through": "2026-11-29",
+    "timezone": "Asia/Shanghai",
+    "as_of": "2026-11-26T10:30:51+08:00"
+  },
+  "facts": {
+    "pending_records": 3,
+    "published_in_period": 0,
+    "sample_works": 0,
+    "eligible_snapshots": 0
+  },
+  "publications": [],
+  "observations": [],
+  "comparisons": [],
+  "basis_sha256": "7042e1121738832f58981a0f15c67d5b5eac0e6bb1a8dd848af4f0cf0b020a3e",
+  "editorial_notes": []
+}
+
+===== workspace/p8-simulation/reports/p8-demo/review.md =====
+
+# Kai 运营复盘（模拟数据）
+
+发布批次 2026-11-23 至 2026-11-29，北京时间。数据截至 2026-11-30T09:00:00+08:00。
+
+## 记录事实
+
+台账待发布 0 条。本期确认发布 4 条，其中 4 条有指标，符合时间范围的累计快照共 7 条。
+
+## 最新快照及计算结果
+
+每条作品显示截至复盘时间的最新一笔累计快照。工时按作品录入。总成本由制作成本及额外成本组成，净收益须同时有收入和两项成本。财务单位为人民币元。
+
+### douyin / video
+
+| 作品 | 发布后小时 | 播放／浏览 | 万次新增粉 | 点赞率 | 收藏率 | 分享率 | 完播率 | 平均观看秒／片长秒 | 人工分钟 | 有效咨询 | 收入／制作成本／额外成本／总成本／净收益 |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |
+| 模拟｜AI 复核方法 · sim-douyin-video-20c7adf3c59ddf5e | 69 | 1,600 · 播放量 | 75 | 10.00% | 3.75% | 2.00% | 35.00% | 14／50 | 20 | 1 | 60.00／10.00／5.00／15.00／45.00 |
+| 模拟｜AI 复核对照 · sim-douyin-video-8238a27d102b765f | 24 | 500 · 播放量 | 40 | 5.00% | 1.00% | 缺失 | 缺失 | 缺失／50 | 80 | 缺失 | 缺失／0.00／缺失／缺失／缺失 |
+
+### xiaohongshu / note
+
+| 作品 | 发布后小时 | 播放／浏览 | 万次新增粉 | 点赞率 | 收藏率 | 分享率 | 完播率 | 平均观看秒／片长秒 | 人工分钟 | 有效咨询 | 收入／制作成本／额外成本／总成本／净收益 |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |
+| 模拟｜AI 复核卡片 · sim-xiaohongshu-note-20c7adf3c59ddf5e | 166 | 520 · 浏览量 | 缺失 | 缺失 | 10.00% | 0.96% | 缺失 | 缺失／缺失 | 60 | 缺失 | 缺失／0.00／缺失／缺失／缺失 |
+
+### xiaohongshu / video
+
+| 作品 | 发布后小时 | 播放／浏览 | 万次新增粉 | 点赞率 | 收藏率 | 分享率 | 完播率 | 平均观看秒／片长秒 | 人工分钟 | 有效咨询 | 收入／制作成本／额外成本／总成本／净收益 |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |
+| 模拟｜AI 复核视频 · sim-xiaohongshu-video-20c7adf3c59ddf5e | 23 | 0 · 播放量 | 缺失 | 缺失 | 缺失 | 缺失 | 0.00% | 缺失／50 | 40 | 缺失 | 缺失／0.00／缺失／缺失／缺失 |
+
+## 同平台、同形式、同观察窗口比较
+
+24、72、168 小时分别允许偏差 6、12、24 小时。每个窗口每条作品选最近一次快照。括号内为该指标的有效作品数。
+
+### douyin / video / 24 小时
+
+播放量 · 作品累计 · 实际 24–26 小时 · 2 条作品
+
+- AI 实测（1 条） · 播放／浏览 1,000（1），万次新增粉 100（1），点赞率 10.00%（1），收藏率 3.00%（1），分享率 2.00%（1），完播率 40.00%（1），平均观看秒 16（1），人工分钟 20（1），制作成本 10.00（1），有效咨询 0（1），收入 0.00（1），总成本 15.00（1），净收益 -15.00（1）
+- 工作流演示（1 条） · 播放／浏览 500（1），万次新增粉 40（1），点赞率 5.00%（1），收藏率 1.00%（1），人工分钟 80（1），制作成本 0.00（1）
+
+### douyin / video / 72 小时
+
+播放量 · 作品累计 · 实际 69 小时 · 1 条作品
+
+- AI 实测（1 条） · 播放／浏览 1,600（1），万次新增粉 75（1），点赞率 10.00%（1），收藏率 3.75%（1），分享率 2.00%（1），完播率 35.00%（1），平均观看秒 14（1），人工分钟 20（1），制作成本 10.00（1），有效咨询 1（1），收入 60.00（1），总成本 15.00（1），净收益 45.00（1）
+
+### xiaohongshu / note / 24 小时
+
+浏览量 · 作品累计 · 实际 23 小时 · 1 条作品
+
+- AI 实测（1 条） · 播放／浏览 300（1），万次新增粉 33.33（1），收藏率 11.00%（1），分享率 1.00%（1），人工分钟 60（1），制作成本 0.00（1）
+
+### xiaohongshu / note / 168 小时
+
+浏览量 · 作品累计 · 实际 166 小时 · 1 条作品
+
+- AI 实测（1 条） · 播放／浏览 520（1），收藏率 10.00%（1），分享率 0.96%（1），人工分钟 60（1），制作成本 0.00（1）
+
+### xiaohongshu / video / 24 小时
+
+播放量 · 作品累计 · 实际 23 小时 · 1 条作品
+
+- AI 实测（1 条） · 播放／浏览 0（1），完播率 0.00%（1），人工分钟 40（1），制作成本 0.00（1）
+
+## 编辑判断
+
+- **涨粉效率**　抖音视频约 24 小时窗口，复核方法每万播放新增 100 粉，对照为 40。两条样本只说明本次差异。（依据 sim-douyin-video-20c7adf3c59ddf5e、sim-douyin-video-8238a27d102b765f）
+- **收藏与分享**　同窗口复核方法收藏率 3%，对照为 1%。对照缺分享数据，分享率无法成对比较。（依据 sim-douyin-video-20c7adf3c59ddf5e、sim-douyin-video-8238a27d102b765f）
+- **视频节奏**　复核方法约 69 小时的平均观看为 14 秒，视频 50 秒。应配合留存曲线核对开场及掉点，现有数据无法定位节奏问题。（依据 sim-douyin-video-20c7adf3c59ddf5e）
+- **人工与成本**　同组对照录入 80 分钟，复核方法 20 分钟。工时按发布记录填写。（依据 sim-douyin-video-20c7adf3c59ddf5e、sim-douyin-video-8238a27d102b765f）
+- **商业转化**　复核方法约 69 小时累计录入 1 条有效咨询和 60 元收入。支出 15 元，可计算净收益为 45 元。以上均为模拟。（依据 sim-douyin-video-20c7adf3c59ddf5e）
+- **待验证方向**　在抖音相同窗口再测试复核方法与对照题材，补录分享和留存数据。保持现有选题权重。（依据 sim-douyin-video-20c7adf3c59ddf5e、sim-douyin-video-8238a27d102b765f）
+少量样本只用于描述当期表现，后续验证仍需积累同口径样本。
+
+===== src/review.py =====
+
+"""P8 command line for recording actual publications and reviewing results."""
+
+import argparse
+import csv
+import json
+import sys
+from pathlib import Path
+
+from review_data import FORMATS, PLATFORMS, Operations, confirm, import_metrics, register
+from review_report import report
+
+
+def production_fields(command):
+    command.add_argument("--manual-minutes", help="Human production minutes allocated to this publication")
+    command.add_argument("--production-cost-cny", help="Production cost allocated to this publication (CNY)")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--simulate", action="store_true", help="Use the isolated simulated workspace")
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    pending = commands.add_parser("register", help="Associate a local P7 package with pending records")
+    pending.add_argument("manifest", type=Path)
+    pending.add_argument("--category", required=True)
+    pending.add_argument("--platform", choices=PLATFORMS)
+    pending.add_argument("--format", choices=FORMATS)
+    production_fields(pending)
+
+    actual = commands.add_parser("confirm", help="Record actual publication after the user confirms it")
+    actual.add_argument("publication_id")
+    actual.add_argument("--confirmed-published", action="store_true")
+    actual.add_argument("--title", required=True)
+    actual.add_argument("--published-at", required=True)
+    actual.add_argument("--work-id")
+    actual.add_argument("--url")
+    production_fields(actual)
+
+    commands.add_parser("list", help="List the pending and published records")
+    metrics = commands.add_parser("import", help="Import cumulative metrics from CSV or JSONL")
+    metrics.add_argument("file", type=Path)
+
+    brief = commands.add_parser("report", help="Create a Markdown and JSON operation review")
+    brief.add_argument("--start", help="First publication date, inclusive (Asia/Shanghai)")
+    brief.add_argument("--through", help="Last publication date, inclusive (Asia/Shanghai)")
+    brief.add_argument("--as-of", help="Use snapshots through this ISO 8601 time (default: now)")
+    brief.add_argument("--name", help="Report folder name")
+    brief.add_argument("--editorial", type=Path, help="Codex notes for this report's current numerical basis")
+
+    args = parser.parse_args()
+    operations = Operations(args.simulate)
+    try:
+        with operations.lock:
+            if args.command == "report":
+                print(report(args, operations))
+                return 0
+            if args.command == "list":
+                _, _, records = operations.publications()
+                result = [record for record, _ in records.values()]
+            else:
+                handler = {"register": register, "confirm": confirm, "import": import_metrics}[args.command]
+                result = handler(args, operations)
+            print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
+    except (OSError, ValueError, KeyError, AttributeError, TypeError, csv.Error) as error:
+        print(f"Review error: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+===== src/review_data.py =====
+
+"""Local publication records and per-work cumulative metric snapshots."""
+
+import csv
+import hashlib
+import json
+from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
+from pathlib import Path
+
+from research import HISTORY, ROOT, WORKSPACE, atomic_write, history_lock, read_history, write_history
+from research_collect import SHANGHAI, checked_url, required_text, url_key
+from research_topics import TOPIC_STATES
+
+
+PLATFORMS = ("douyin", "xiaohongshu")
+FORMATS = ("video", "note")
+COUNTS = ("view_count", "likes", "comments", "saves", "shares", "new_followers",
+          "impressions", "qualified_inquiries")
+MONEY = ("revenue_cny", "additional_cost_cny")
+METRICS = (*COUNTS, "completion_rate", "avg_watch_seconds", *MONEY)
+METADATA = ("publication_id", "collected_at", "view_metric", "metric_scope")
+CSV_FIELDS = ("publication_id", "collected_at", "view_metric", "view_count",
+              "likes", "comments", "saves", "shares", "new_followers", "completion_rate",
+              "avg_watch_seconds", "impressions", "qualified_inquiries", *MONEY, "metric_scope")
+
+
+def timestamp(value, label):
+    try:
+        stamp = datetime.fromisoformat(required_text(value, label))
+        if stamp.utcoffset() is None:
+            raise ValueError()
+    except ValueError as error:
+        raise ValueError(f"{label} requires ISO 8601 with a timezone offset") from error
+    return stamp.astimezone(timezone.utc)
+
+
+def optional_text(value, label):
+    return None if value is None or isinstance(value, str) and not value.strip() else required_text(value, label)
+
+
+def number(value, label, *, integer=False, money=False, rate=False):
+    if value is None or isinstance(value, str) and not value.strip():
+        return None
+    try:
+        raw = str(value).strip()
+        percent = rate and raw.endswith("%")
+        parsed = Decimal(raw[:-1] if percent else raw)
+        ceiling = 10**12 if money else 10**15
+        if not parsed.is_finite() or not 0 <= parsed <= ceiling:
+            raise InvalidOperation()
+        if percent:
+            parsed /= 100
+        if (rate and parsed > 1 or integer and parsed != parsed.to_integral_value()
+                or money and parsed != parsed.quantize(Decimal("0.01"))):
+            raise InvalidOperation()
+    except InvalidOperation as error:
+        unit = "a fraction 0–1 or a percentage" if rate else "a non-negative number"
+        raise ValueError(f"{label} must be {unit} with the expected precision") from error
+    return int(parsed) if integer else float(parsed)
+
+
+def read_jsonl(path):
+    rows = []
+    with path.open(encoding="utf-8-sig") as source:
+        for index, line in enumerate(source, 1):
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise ValueError("expected an object")
+            except ValueError as error:
+                raise ValueError(f"{path.name}, line {index}: {error}") from error
+            rows.append((index, row))
+    return rows
+
+
+def write_jsonl(path, records):
+    atomic_write(path, "".join(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n"
+                               for row in records))
+
+
+class Operations:
+    def __init__(self, simulate):
+        self.mode = "simulated" if simulate else "real"
+        self.directory = WORKSPACE / ("p8-simulation" if simulate else "p8-operations")
+        self.standalone = self.directory / "publications.jsonl"
+        self.snapshots = self.directory / "snapshots.jsonl"
+        self.history = self.directory / "research-history.jsonl" if simulate else HISTORY
+        self.lock = history_lock(self.history)
+
+    def load(self, path):
+        rows = [row for _, row in read_jsonl(path)] if path.exists() else []
+        if any(row.get("data_mode") != self.mode for row in rows):
+            raise ValueError(f"{path.name} contains a record from the wrong data mode")
+        return rows
+
+    def publications(self):
+        history = read_history(self.history)
+        standalone = self.load(self.standalone)
+        by_id = {row["publication_id"]: (row, None) for row in standalone}
+        for topic in history:
+            for row in topic.get("publications", []):
+                if row.get("data_mode") != self.mode:
+                    raise ValueError("Research history contains a publication from the wrong data mode")
+                by_id[row["publication_id"]] = (row, topic)
+        return history, standalone, by_id
+
+    def save(self, history, standalone, topic):
+        if topic is not None:
+            write_history(history, self.history)
+        else:
+            self.directory.mkdir(parents=True, exist_ok=True)
+            write_jsonl(self.standalone, standalone)
+
+
+def candidates(args, operations):
+    path = args.manifest.resolve()
+    base = ROOT / "output" if operations.mode == "real" else operations.directory
+    if not path.is_relative_to(base) or (operations.mode == "real" and path.name != "publish_manifest.json"):
+        raise ValueError(f"Use a {operations.mode} publication manifest under {base}")
+    raw = path.read_bytes()
+    manifest = json.loads(raw.decode("utf-8-sig"))
+    if manifest.get("data_mode", "real") != operations.mode:
+        raise ValueError("Publication manifest has the wrong data mode")
+    if manifest.get("schema_version") != 1 or manifest.get("status") != "awaiting_human_review":
+        raise ValueError("Use a complete P7 package marked awaiting_human_review")
+    manifest_sha = hashlib.sha256(raw).hexdigest()
+    source = manifest["source"]
+    lane = source["lane"]
+    topic_id = optional_text(source.get("topic_id"), "topic_id")
+    clip_id = optional_text(source.get("clip_id"), "clip_id")
+    if not (lane == "A" and clip_id or lane == "B" and topic_id):
+        raise ValueError("Manifest must identify the A-line clip or B-line topic")
+    cost = number(args.production_cost_cny, "production_cost_cny", money=True)
+    minutes = number(args.manual_minutes, "manual_minutes")
+    records = []
+    for platform in PLATFORMS:
+        if args.platform and platform != args.platform:
+            continue
+        package = manifest["platforms"].get(platform, {})
+        cards = package.get("cards", {})
+        artifacts = {"video": [package["files"]["video"]]} if package.get("files", {}).get("video") else {}
+        if cards.get("status") == "packaged" and cards.get("files"):
+            artifacts["note"] = cards["files"]
+        for form, files in artifacts.items():
+            if args.format and form != args.format:
+                continue
+            duration = number(source["media"]["duration_seconds"], "duration_seconds") if form == "video" else None
+            if form == "video" and not duration:
+                raise ValueError("Video duration must be positive")
+            prefix = "pub" if operations.mode == "real" else "sim"
+            records.append({
+                "schema_version": 1, "data_mode": operations.mode,
+                "publication_id": f"{prefix}-{platform}-{form}-{manifest_sha[:16]}",
+                "status": "pending", "topic_id": topic_id, "clip_id": clip_id,
+                "lane": lane, "category": required_text(args.category, "category"),
+                "render_manifest": source["render"], "publish_manifest": {
+                    "path": path.relative_to(ROOT).as_posix(), "sha256": manifest_sha,
+                }, "artifacts": [{key: file[key] for key in ("path", "sha256")} for file in files],
+                "platform": platform, "format": form, "duration_seconds": duration,
+                "manual_minutes": minutes, "production_cost_cny": cost,
+                "title": None, "published_at": None, "work_id": None, "url": None, "confirmed_at": None,
+            })
+    if not records:
+        raise ValueError("The package does not contain the requested platform or format")
+    return records
+
+
+def fill_production(record, values):
+    for key in ("manual_minutes", "production_cost_cny"):
+        value = values.get(key)
+        if value is None:
+            continue
+        if record[key] is not None and record[key] != value:
+            raise ValueError(f"{key} is already recorded for {record['publication_id']}")
+        record[key] = value
+
+
+def register(args, operations):
+    records = candidates(args, operations)
+    history, standalone, by_id = operations.publications()
+    topic_id = records[0]["topic_id"]
+    lane = records[0]["lane"]
+    topic = next((row for row in history if topic_id and row["topic_id"] == topic_id), None)
+    if operations.mode == "real" and lane == "B" and topic is None:
+        raise ValueError(f"Unknown B-line topic in P5 history: {topic_id}")
+    if topic is not None and topic["line"] != lane:
+        raise ValueError("Publication lane differs from the P5 topic lane")
+    target = topic.setdefault("publications", []) if topic else standalone
+    result = []
+    changed = False
+    for row in records:
+        identity = row["publication_id"]
+        if identity in by_id:
+            prior, owner = by_id[identity]
+            if (owner is not topic or prior["category"] != row["category"]
+                    or prior["publish_manifest"]["sha256"] != row["publish_manifest"]["sha256"]):
+                raise ValueError(f"Publication already registered with different metadata: {identity}")
+            previous = prior.copy()
+            fill_production(prior, row)
+            changed |= prior != previous
+            result.append(prior)
+        else:
+            target.append(row)
+            result.append(row)
+            changed = True
+    if changed:
+        operations.save(history, standalone, topic)
+    return result
+
+
+def confirm(args, operations):
+    if not args.confirmed_published:
+        raise ValueError("Explicit user confirmation of actual publication is required: --confirmed-published")
+    history, standalone, by_id = operations.publications()
+    if args.publication_id not in by_id:
+        raise ValueError(f"Unknown {operations.mode} publication: {args.publication_id}")
+    row, topic = by_id[args.publication_id]
+    stamp = timestamp(args.published_at, "published_at")
+    now = datetime.now(timezone.utc)
+    if operations.mode == "real" and stamp > now:
+        raise ValueError("Actual publication time cannot be in the future")
+    work_id = optional_text(args.work_id, "work_id")
+    url = checked_url(args.url) if args.url is not None else None
+    if work_id is None and url is None:
+        raise ValueError("Provide a platform work ID or URL")
+    for prior, _ in by_id.values():
+        if prior is row or prior["platform"] != row["platform"] or prior["status"] != "published":
+            continue
+        if (work_id and prior["work_id"] == work_id
+                or url and prior["url"] and url_key(url) == url_key(prior["url"])):
+            raise ValueError(f"Platform work already recorded as {prior['publication_id']}")
+    details = {
+        "title": required_text(args.title, "actual title"),
+        "published_at": stamp.isoformat(), "work_id": work_id, "url": url,
+    }
+    previous = row.copy()
+    if row["status"] == "published":
+        for key, value in details.items():
+            if value is not None and row[key] not in (None, value):
+                raise ValueError(f"Confirmed publication already has a different {key}")
+    if topic is not None:
+        state = topic["status"]
+        if state != "published" and "published" not in TOPIC_STATES[state]:
+            raise ValueError(f"Record production in P5 history before confirming publication: {state}")
+        if state != "published":
+            topic.update(status="published", status_note=f"P8 已确认实际发布 {row['publication_id']}",
+                         status_at=now.astimezone(SHANGHAI).isoformat(timespec="seconds"))
+    row.update({key: value for key, value in details.items() if value is not None})
+    row.update(status="published", confirmed_at=row["confirmed_at"] or now.isoformat(timespec="seconds"))
+    fill_production(row, {
+        "manual_minutes": number(args.manual_minutes, "manual_minutes"),
+        "production_cost_cny": number(args.production_cost_cny, "production_cost_cny", money=True),
+    })
+    if row != previous:
+        operations.save(history, standalone, topic)
+    return row
+
+
+def input_rows(path):
+    if path.suffix.lower() == ".jsonl":
+        yield from read_jsonl(path)
+    elif path.suffix.lower() == ".csv":
+        with path.open(encoding="utf-8-sig", newline="") as source:
+            reader = csv.DictReader(source, strict=True)
+            names = reader.fieldnames or []
+            if len(names) != len(set(names)) or not {"publication_id", "collected_at"} <= set(names):
+                raise ValueError("CSV requires unique headers including publication_id and collected_at")
+            if set(names) - set(CSV_FIELDS):
+                raise ValueError(f"Unknown CSV columns: {', '.join(sorted(set(names) - set(CSV_FIELDS)))}")
+            for row in reader:
+                yield reader.line_num, row
+    else:
+        raise ValueError("Use a .csv or .jsonl file")
+
+
+def snapshot(raw, operations, by_id, now):
+    if set(raw) - {*METADATA, *METRICS, "data_mode"}:
+        raise ValueError("Unknown metrics fields or extra CSV columns")
+    if raw.get("data_mode", operations.mode) != operations.mode:
+        raise ValueError("Snapshot has the wrong data mode")
+    identity = required_text(raw.get("publication_id"), "publication_id")
+    if identity.startswith("sim-") and operations.mode == "real":
+        raise ValueError("Cannot import a simulated publication into real history")
+    if identity not in by_id or by_id[identity][0]["status"] != "published":
+        raise ValueError(f"Snapshot requires a confirmed publication: {identity}")
+    post = by_id[identity][0]
+    time = timestamp(raw.get("collected_at"), "collected_at")
+    if time < timestamp(post["published_at"], "published_at") or operations.mode == "real" and time > now:
+        raise ValueError("Snapshot must be collected between actual publication and now")
+    values = {name: number(raw.get(name), name, integer=name in COUNTS,
+                           money=name in MONEY, rate=name == "completion_rate") for name in METRICS}
+    if all(value is None for value in values.values()):
+        raise ValueError("Supply at least one known metric")
+    view_metric = optional_text(raw.get("view_metric"), "view_metric")
+    if values["view_count"] is not None and view_metric is None:
+        raise ValueError("Enter the platform's metric label as view_metric alongside view_count")
+    if post["format"] != "video" and any(values[name] is not None for name in ("completion_rate", "avg_watch_seconds")):
+        raise ValueError("Completion rate and average watch time are video metrics")
+    return {
+        "schema_version": 1, "data_mode": operations.mode,
+        "publication_id": identity, "collected_at": time.isoformat(),
+        "view_metric": view_metric,
+        "metric_scope": optional_text(raw.get("metric_scope"), "metric_scope") or "作品累计",
+        **values,
+    }
+
+
+def import_metrics(args, operations):
+    _, _, by_id = operations.publications()
+    rows = operations.load(operations.snapshots)
+    indexed = {(row["publication_id"], row["collected_at"]): row for row in rows}
+    added = 0
+    unchanged = 0
+    now = datetime.now(timezone.utc)
+    for line, raw in input_rows(args.file):
+        try:
+            row = snapshot(raw, operations, by_id, now)
+            key = row["publication_id"], row["collected_at"]
+            if key in indexed:
+                if indexed[key] != row:
+                    raise ValueError(f"Conflicting snapshot for {key[0]} at {key[1]}")
+                unchanged += 1
+                continue
+            indexed[key] = row
+            added += 1
+        except (ValueError, TypeError) as error:
+            raise ValueError(f"{args.file.name}, line {line}: {error}") from error
+    if added:
+        operations.directory.mkdir(parents=True, exist_ok=True)
+        write_jsonl(operations.snapshots, indexed.values())
+    return {"data_mode": operations.mode, "imported": added, "unchanged": unchanged}
+
+===== src/review_report.py =====
+
+"""Deterministic P8 calculations and Markdown/JSON reports."""
+
+import hashlib
+import json
+import re
+from collections import defaultdict
+from datetime import date, datetime, timedelta
+from decimal import Decimal
+from statistics import median
+
+from research import atomic_write, json_text
+from research_collect import SHANGHAI, read_json, required_text
+from review_data import METRICS, timestamp
+
+
+WINDOWS = {24: 6, 72: 12, 168: 24}
+RATES = {"like_rate": "likes", "save_rate": "saves", "share_rate": "shares"}
+COMPARABLE = {
+    "view_count": "播放／浏览", "new_followers_per_10k": "万次新增粉",
+    "like_rate": "点赞率", "save_rate": "收藏率", "share_rate": "分享率",
+    "completion_rate": "完播率", "avg_watch_seconds": "平均观看秒",
+    "manual_minutes": "人工分钟", "production_cost_cny": "制作成本",
+    "qualified_inquiries": "有效咨询", "revenue_cny": "收入", "total_cost_cny": "总成本", "net_cny": "净收益",
+}
+
+
+def publication_hours(post, snapshot):
+    collected = timestamp(snapshot["collected_at"], "collected_at")
+    published = timestamp(post["published_at"], "published_at")
+    return (collected - published).total_seconds() / 3600
+
+
+def calculated(post, snapshot):
+    def ratio(numerator, factor=1):
+        views = snapshot["view_count"]
+        value = snapshot[numerator]
+        return value * factor / views if views and value is not None else None
+
+    production = post["production_cost_cny"]
+    additional = snapshot["additional_cost_cny"]
+    revenue = snapshot["revenue_cny"]
+    total = Decimal(str(production)) + Decimal(str(additional)) if production is not None and additional is not None else None
+    net = Decimal(str(revenue)) - total if total is not None and revenue is not None else None
+    return {
+        "publication_id": post["publication_id"], "platform": post["platform"], "format": post["format"],
+        "lane": post["lane"], "category": post["category"], "title": post["title"],
+        "duration_seconds": post["duration_seconds"],
+        "collected_at": timestamp(snapshot["collected_at"], "collected_at").astimezone(SHANGHAI).isoformat(),
+        "hours_after_publish": round(publication_hours(post, snapshot), 6),
+        "view_metric": snapshot["view_metric"], "metric_scope": snapshot["metric_scope"],
+        **{key: snapshot[key] for key in METRICS},
+        "manual_minutes": post["manual_minutes"], "production_cost_cny": production,
+        "new_followers_per_10k": ratio("new_followers", 10000),
+        **{key: ratio(field) for key, field in RATES.items()},
+        "total_cost_cny": float(total) if total is not None else None,
+        "net_cny": float(net) if net is not None else None,
+    }
+
+
+def medians(rows):
+    result = {}
+    for key in COMPARABLE:
+        values = [row[key] for row in rows if row[key] is not None]
+        result[key] = {"n": len(values), "value": median(values) if values else None}
+    return result
+
+
+def comparisons(posts, snapshots):
+    grouped = defaultdict(list)
+    for post in posts:
+        observations = [(publication_hours(post, row), row) for row in snapshots[post["publication_id"]]]
+        for window, tolerance in WINDOWS.items():
+            options = [(hours, row) for hours, row in observations if abs(hours - window) <= tolerance]
+            if not options:
+                continue
+            _, chosen = min(options, key=lambda item: (abs(item[0] - window), item[0]))
+            key = post["platform"], post["format"], window, chosen["view_metric"] or "", chosen["metric_scope"]
+            grouped[key].append(calculated(post, chosen))
+    result = []
+    for (platform, form, window, label, scope), rows in sorted(grouped.items()):
+        by_category = defaultdict(list)
+        for row in rows:
+            by_category[row["category"]].append(row)
+        hours = [row["hours_after_publish"] for row in rows]
+        result.append({
+            "platform": platform, "format": form, "window_hours": window, "tolerance_hours": WINDOWS[window],
+            "view_metric": label or None, "metric_scope": scope, "actual_hours_min": min(hours),
+            "actual_hours_max": max(hours), "sample_works": len(rows), "medians": medians(rows),
+            "categories": [{"category": category, "sample_works": len(works), "medians": medians(works)}
+                           for category, works in sorted(by_category.items())],
+            "works": rows,
+        })
+    return result
+
+
+def review_period(args):
+    now = datetime.now(SHANGHAI)
+    as_of = timestamp(args.as_of, "as_of").astimezone(SHANGHAI) if args.as_of else now.replace(microsecond=0)
+    if (args.start is None) != (args.through is None):
+        raise ValueError("Provide both --start and --through, or use this week")
+    if args.start is not None:
+        start, through = date.fromisoformat(args.start), date.fromisoformat(args.through)
+    else:
+        start = as_of.date() - timedelta(days=as_of.weekday())
+        through = start + timedelta(days=6)
+    if start > through:
+        raise ValueError("Start date must not be after through date")
+    return start, through, as_of
+
+
+def build_report(operations, start, through, as_of):
+    _, _, all_records = operations.publications()
+    records = [record for record, _ in all_records.values()]
+    posts = []
+    for row in records:
+        if row["status"] != "published":
+            continue
+        published = timestamp(row["published_at"], "published_at").astimezone(SHANGHAI)
+        if start <= published.date() <= through and published <= as_of:
+            posts.append(row)
+    posts.sort(key=lambda row: (row["platform"], row["format"], row["published_at"], row["publication_id"]))
+    by_post = {row["publication_id"]: [] for row in posts}
+    for row in operations.load(operations.snapshots):
+        identity = row["publication_id"]
+        if identity in by_post and timestamp(row["collected_at"], "collected_at") <= as_of:
+            by_post[identity].append(row)
+    latest = [calculated(post, max(by_post[post["publication_id"]],
+                                   key=lambda row: timestamp(row["collected_at"], "collected_at")))
+              for post in posts if by_post[post["publication_id"]]]
+    facts = {
+        "pending_records": sum(row["status"] == "pending" for row in records),
+        "published_in_period": len(posts), "sample_works": len(latest),
+        "eligible_snapshots": sum(map(len, by_post.values())),
+    }
+    data = {
+        "schema_version": 1, "data_mode": operations.mode,
+        "period": {"start": start.isoformat(), "through": through.isoformat(), "timezone": "Asia/Shanghai"},
+        "facts": facts, "publications": posts,
+        "observations": latest, "comparisons": comparisons(posts, by_post),
+    }
+    fingerprint = hashlib.sha256(json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+    data["period"]["as_of"] = as_of.isoformat()
+    data["basis_sha256"] = fingerprint
+    return data
+
+
+def editor_notes(path, data):
+    if path is None:
+        return []
+    notes = read_json(path)
+    if notes["data_mode"] != data["data_mode"] or notes["basis_sha256"] != data["basis_sha256"]:
+        raise ValueError("Editorial notes do not match this report's data mode and basis_sha256")
+    eligible = {row["publication_id"] for row in data["observations"]}
+    result = []
+    for item in notes["notes"]:
+        refs = item["publication_ids"]
+        if not isinstance(refs, list) or not refs or not set(refs) <= eligible:
+            raise ValueError("Editorial notes must reference publications with eligible observations")
+        result.append({"section": required_text(item["section"], "section"),
+                       "text": required_text(item["text"], "text"), "publication_ids": refs})
+    return result
+
+
+def display(value, key=""):
+    if value is None:
+        return "缺失"
+    if key in (*RATES, "completion_rate"):
+        return f"{value:.2%}"
+    if key.endswith("_cny"):
+        return f"{value:,.2f}"
+    if isinstance(value, float):
+        return f"{value:,.2f}".rstrip("0").rstrip(".")
+    if isinstance(value, int):
+        return f"{value:,}"
+    return str(value).replace("|", "｜").replace("\n", " ").replace("\r", " ")
+
+
+def markdown(data):
+    simulated = data["data_mode"] == "simulated"
+    facts = data["facts"]
+    period = data["period"]
+    lines = ["# Kai 运营复盘" + ("（模拟数据）" if simulated else ""), "",
+             f"发布批次 {period['start']} 至 {period['through']}，北京时间。数据截至 {period['as_of']}。", "",
+             "## 记录事实", "",
+             f"台账待发布 {facts['pending_records']} 条。本期确认发布 {facts['published_in_period']} 条，"
+             f"其中 {facts['sample_works']} 条有指标，符合时间范围的累计快照共 {facts['eligible_snapshots']} 条。"]
+    sampled_ids = {row["publication_id"] for row in data["observations"]}
+    unsampled = [post for post in data["publications"]
+                 if post["publication_id"] not in sampled_ids]
+    if not facts["sample_works"]:
+        lines += ["", "暂无有效运营样本。" if not simulated else "暂无有效模拟运营样本。"]
+    if unsampled:
+        lines += ["", "### 尚无指标的发布记录", ""]
+        for row in unsampled:
+            lines.append(f"- {row['publication_id']} · {display(row['title'])} · "
+                         f"人工 {display(row['manual_minutes'])} 分钟 · 制作成本 {display(row['production_cost_cny'], 'production_cost_cny')}")
+    if not facts["sample_works"]:
+        return "\n".join(lines) + "\n"
+
+    lines += ["", "## 最新快照及计算结果", "",
+              "每条作品显示截至复盘时间的最新一笔累计快照。工时按作品录入。"
+              "总成本由制作成本及额外成本组成，净收益须同时有收入和两项成本。财务单位为人民币元。"]
+    for (platform, form) in dict.fromkeys((row["platform"], row["format"]) for row in data["observations"]):
+        lines += ["", f"### {platform} / {form}", "",
+                  "| 作品 | 发布后小时 | 播放／浏览 | 万次新增粉 | 点赞率 | 收藏率 | 分享率 | 完播率 | 平均观看秒／片长秒 | 人工分钟 | 有效咨询 | 收入／制作成本／额外成本／总成本／净收益 |",
+                  "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |"]
+        for row in data["observations"]:
+            if (row["platform"], row["format"]) != (platform, form):
+                continue
+            cells = [
+                f"{display(row['title'])} · {row['publication_id']}", display(row["hours_after_publish"]),
+                f"{display(row['view_count'])} · {display(row['view_metric'])}",
+                *(display(row[key], key) for key in ("new_followers_per_10k", *RATES, "completion_rate")),
+                f"{display(row['avg_watch_seconds'])}／{display(row['duration_seconds'])}",
+                display(row["manual_minutes"]), display(row["qualified_inquiries"]),
+                "／".join(display(row[key], key) for key in ("revenue_cny", "production_cost_cny",
+                                                           "additional_cost_cny", "total_cost_cny", "net_cny")),
+            ]
+            lines.append("| " + " | ".join(cells) + " |")
+
+    lines += ["", "## 同平台、同形式、同观察窗口比较", "",
+              "24、72、168 小时分别允许偏差 6、12、24 小时。每个窗口每条作品选最近一次快照。"
+              "括号内为该指标的有效作品数。"]
+    if not data["comparisons"]:
+        lines += ["", "现有快照未落在预设观察窗口。"]
+    for group in data["comparisons"]:
+        low, high = display(group["actual_hours_min"]), display(group["actual_hours_max"])
+        hours = low if low == high else f"{low}–{high}"
+        lines += ["", f"### {group['platform']} / {group['format']} / {group['window_hours']} 小时", "",
+                  f"{display(group['view_metric'])} · {display(group['metric_scope'])} · "
+                  f"实际 {hours} 小时 · {group['sample_works']} 条作品", ""]
+        for category in group["categories"]:
+            values = [f"{label} {display(stat['value'], key)}（{stat['n']}）"
+                      for key, label in COMPARABLE.items()
+                      if (stat := category["medians"][key])["n"]]
+            lines.append(f"- {display(category['category'])}（{category['sample_works']} 条）"
+                         + (" · " + "，".join(values) if values else " · 暂无可计算中位数"))
+    lines += ["", "## 编辑判断", ""]
+    if data["editorial_notes"]:
+        for note in data["editorial_notes"]:
+            lines += [f"- **{display(note['section'])}**　{note['text']}（依据 {'、'.join(note['publication_ids'])}）"]
+    else:
+        lines.append("待 Codex 按作品和观察窗口解读。")
+    lines.append("少量样本只用于描述当期表现，后续验证仍需积累同口径样本。")
+    return "\n".join(lines) + "\n"
+
+
+def report(args, operations):
+    start, through, as_of = review_period(args)
+    name = args.name or f"review-{start}-to-{through}"
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
+        raise ValueError("Report name must use lowercase ASCII letters, digits and hyphens")
+    data = build_report(operations, start, through, as_of)
+    data["editorial_notes"] = editor_notes(args.editorial, data)
+    dest = operations.directory / "reports" / name
+    dest.mkdir(parents=True, exist_ok=True)
+    atomic_write(dest / "review.json", json_text(data))
+    atomic_write(dest / "review.md", markdown(data))
+    return dest
+
+===== .agents/skills/kai-review/SKILL.md =====
+
+---
+name: kai-review
+description: Use when importing manually collected Kai creator metrics, recording user-confirmed publications, or preparing a weekly Douyin or Xiaohongshu operations review from local data.
+---
+
+# Kai 运营复盘
+
+在仓库根目录读取 `AGENTS.md`、`STATUS.md` 和 [P8 使用说明](../../../README.md#p8-运营数据反馈)。复制 [指标 CSV 模板](assets/metrics-template.csv) 后填后台已知值，或使用同字段的本地 JSONL。
+
+使用 `python -X utf8 src/review.py list` 找到发布记录。新发布包先用 `register` 关联。只有用户明确确认已经实际发布，才用 `confirm --confirmed-published` 以及真实标题、时间和作品 ID 或链接登记。导入数据的请求本身不构成发布确认。按记录上的平台和形式录入，沿用后台指标名称和口径。空白表示缺失，只有后台确认为零时填 0。涉及付费流量或不同统计范围时填写可区分的 `metric_scope`。无批准的后台数据文件时，按现有本地记录复盘并注明缺口。
+
+```powershell
+python -X utf8 src/review.py import 'workspace/最新运营数据.csv'
+python -X utf8 src/review.py report
+```
+
+报告默认选择北京时间本周发布的作品。读返回目录的 `review.json`，从 `comparisons[].works` 使用同平台、同形式、同指标口径、同观察窗口的单条快照，并注明实际经过小时和有效样本数。可查看 `observations` 中每条作品的最新一笔累计数据，保留单条事实的实际窗口。没有有效样本时交付空数据报告。
+
+有指标时，按证据解释涨粉效率、收藏和分享、视频节奏、人工与成本、商业转化及下次应验证的内容方向。完播率或平均观看偏低仅是查阅留存曲线和正片的线索。区分咨询和实收，明确可算净收益的范围。写明缺失、样本不足和分析限制。勿根据小样本推断因果。选题建议交 GPT 或用户审核，保留原评分权重。
+
+要把编辑判断写入 Markdown 和 JSON，在本地建立 UTF-8 编辑稿，复制报告的 `data_mode` 和 `basis_sha256`，在 `notes` 数组中逐项填 `section`、`text` 和 `publication_ids`（依据作品 ID 数组）。以同一发布日期范围及 `--as-of` 重新运行 `report --editorial <编辑稿.json>`，交付两个报告文件。模拟演练使用全局 `--simulate`，并明确标注模拟数据。
+
+===== .agents/skills/kai-review/assets/metrics-template.csv =====
+
+publication_id,collected_at,view_metric,view_count,likes,comments,saves,shares,new_followers,completion_rate,avg_watch_seconds,impressions,qualified_inquiries,revenue_cny,additional_cost_cny,metric_scope
+
+===== README.md P8 数据与使用格式 =====
+
+## P8 运营数据反馈
+
+在项目的 Codex 会话中发送「使用 $kai-review 导入最新运营数据，并生成本周账号复盘」，附上本地后台数据文件或其路径。复制 [CSV 录入模板](.agents/skills/kai-review/assets/metrics-template.csv) 填写。CLI 使用 Python 3.11 标准库。 [kai-review Skill](.agents/skills/kai-review/SKILL.md)
+
+```powershell
+$python = '.\.venv\Scripts\python.exe'
+& $python -X utf8 src/review.py register 'output/p7-ai-reliability-publish/publish_manifest.json' --category 'AI 实测'
+& $python -X utf8 src/review.py list
+# 用户确认实际发布后，使用上一步显示的 pub-… ID 和实际作品信息。
+& $python -X utf8 src/review.py confirm '<发布记录ID>' --confirmed-published --title '<实际上线标题>' --published-at '<实际时间，带 +08:00 等时区>' --work-id '<平台作品ID>'
+& $python -X utf8 src/review.py import 'workspace/最新运营数据.csv'
+& $python -X utf8 src/review.py report
+```
+
+### 发布记录
+
+- `register` 读取 P7 清单，按其中已有的平台和形式分别创建 `pending` 记录。可用 `--platform douyin|xiaohongshu` 和 `--format video|note` 筛选。记录含 A/B 线、人工指定的内容分类、选题或片段 ID、清单路径和哈希、对应成品及视频时长。相同清单、平台和形式重试会返回同一记录。
+- `confirm` 接受实际标题、带偏移的发布时间及 `--work-id` 或 `--url`。例如时间格式 `2026-11-26T15:30:00+08:00`。用 `--manual-minutes` 和 `--production-cost-cny` 添加工时和制作成本，只填写分配给该条发布记录的部分。还可用原确认参数重试以补齐工时、成本或作品链接。
+- 已有 P5 选题的发布明细保存在该选题的 `publications` 数组中，首次实际发布确认与 `produced → published` 一起写入原选题历史。各平台和形式可处于不同状态。无 P5 选题的 A 线按片段关联，存入 `workspace/p8-operations/publications.jsonl`。旧的 P5 `published` 状态本身没有平台明细，需登记并确认实际作品才可导入运营快照。
+
+### 数据录入
+
+每行对应一条已确认作品在一次采集时的后台累计值。使用 UTF-8 CSV 或同名字段的 JSONL。空白或 JSON 的 `null` 表示缺失，后台确认的零填写 0。每行需要发布记录 ID、采集时间和至少一个已知指标。
+
+| 字段 | 填法 |
+| --- | --- |
+| `publication_id`、`collected_at` | 本地发布记录 ID 和带时区偏移的 ISO 8601 采集时间 |
+| `view_metric`、`view_count` | 照录后台名，如「播放量」或「浏览量」。填写数量时必填指标名称 |
+| `likes`、`comments`、`saves`、`shares`、`new_followers` | 累计点赞、评论、收藏、分享、该作品新增粉丝 |
+| `completion_rate`、`avg_watch_seconds` | 视频适用。完播率可填 `0.42` 或 `42%`，平均观看时长填秒数 |
+| `impressions`、`qualified_inquiries` | 可选的曝光量及能归因到该作品的有效商业咨询数 |
+| `revenue_cny`、`additional_cost_cny` | 累计实收和制作成本之外的可归因费用，单位人民币元，最多两位小数 |
+| `metric_scope` | 可选，默认「作品累计」。仅填作品级累计指标。有不同流量范围或统计口径时，用精确、一致的标签区分 |
+
+同一发布 ID 及采集时刻的相同数据可以重复导入。冲突数据会报出行号并拒绝整批写入。累计快照存入 `workspace/p8-operations/snapshots.jsonl`。
+
+### 周报口径
+
+- 默认选北京时间本周发布的作品。可用 `--start YYYY-MM-DD --through YYYY-MM-DD` 指定含首尾的发布日期范围，用 `--as-of` 指定快照截止时间。期间发布且截至时刻有有效快照的作品计入有效样本。
+- 单条近况取截止时刻最新快照。分组比较按平台、形式、指标口径和发布后目标窗口进行，取各作品最接近目标的快照，同距取较早一笔。24、72、168 小时窗口分别允许偏差 6、12、24 小时，并显示实际发布后小时。累计快照逐笔保留，计算时每条作品每个窗口只用一笔。
+- 每万次播放／浏览新增粉丝、点赞率、收藏率及分享率仅在对应分子已知且分母为正时计算。同一分组按内容分类计算中位数，并给出各指标有效样本数。已知制作成本及额外成本时计算总成本，再结合已知收入计算净收益。
+- 报告写入 `workspace/p8-operations/reports/`。可用 `--name` 指定报告目录名。机器可读的 `review.json` 保留作品来源、最新快照、窗口明细和分组计算。Codex 按 Skill 用 `--editorial` 将注明依据的编辑判断写入 Markdown 与 JSON。运营建议保留给 GPT 或用户审核。
+- 模拟入口为 `src/review.py --simulate <子命令>`，台账、模拟清单及报告均在 `workspace/p8-simulation/`，记录 ID 以 `sim-` 开头。P8 验收与示例见 [P8 审核文本](P8-REVIEW.txt)。
+
+===== src/research.py 改动后的历史读写与状态入口 =====
+
+@contextmanager
+def history_lock(history_path=HISTORY):
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    with history_path.with_suffix(".lock").open("a+b") as handle:
+        if os.name == "nt":
+            import msvcrt
+            handle.seek(0)
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # Closing the handle releases the lock, including after an interrupted process.
+        yield
+
+def read_history(history_path=HISTORY):
+    if not history_path.exists():
+        return []
+    with history_path.open(encoding="utf-8") as source:
+        return [json.loads(line) for line in source if line.strip()]
+
+def write_history(history, history_path=HISTORY):
+    atomic_write(history_path, "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in history))
+
+def history_status(args):
+    if not args.topic_id:
+        for row in read_history():
+            print(json.dumps(row, ensure_ascii=False))
+        return
+    if not args.status or not args.note or not args.note.strip():
+        raise ValueError("Updating history requires a status and a note recording the actual progress")
+    with history_lock():
+        history = read_history()
+        row = next((row for row in history if row["topic_id"] == args.topic_id), None)
+        if row is None:
+            raise ValueError(f"Unknown topic: {args.topic_id}")
+        if not (task_path(row["task"]) / "topics.json").is_file():
+            raise ValueError("Finalize the research task before updating a topic status")
+        if args.status not in TOPIC_STATES[row["status"]]:
+            raise ValueError(f"Invalid status transition: {row['status']} to {args.status}")
+        if args.status == "published" and row.get("publications"):
+            raise ValueError("Confirm the actual platform publication with src/review.py confirm")
+        row.update(status=args.status, status_note=args.note.strip(),
+                   status_at=datetime.now(SHANGHAI).isoformat(timespec="seconds"))
+        write_history(history)
+    print(f"{args.topic_id}: {args.status}")

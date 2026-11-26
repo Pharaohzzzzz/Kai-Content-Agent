@@ -37,9 +37,9 @@ def atomic_write(path, contents):
 
 
 @contextmanager
-def history_lock():
-    WORKSPACE.mkdir(exist_ok=True)
-    with HISTORY.with_suffix(".lock").open("a+b") as handle:
+def history_lock(history_path=HISTORY):
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    with history_path.with_suffix(".lock").open("a+b") as handle:
         if os.name == "nt":
             import msvcrt
             handle.seek(0)
@@ -51,15 +51,15 @@ def history_lock():
         yield
 
 
-def read_history():
-    if not HISTORY.exists():
+def read_history(history_path=HISTORY):
+    if not history_path.exists():
         return []
-    with HISTORY.open(encoding="utf-8") as source:
+    with history_path.open(encoding="utf-8") as source:
         return [json.loads(line) for line in source if line.strip()]
 
 
-def write_history(history):
-    atomic_write(HISTORY, "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in history))
+def write_history(history, history_path=HISTORY):
+    atomic_write(history_path, "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in history))
 
 
 def task_path(run_id):
@@ -205,6 +205,8 @@ def history_status(args):
             raise ValueError("Finalize the research task before updating a topic status")
         if args.status not in TOPIC_STATES[row["status"]]:
             raise ValueError(f"Invalid status transition: {row['status']} to {args.status}")
+        if args.status == "published" and row.get("publications"):
+            raise ValueError("Confirm the actual platform publication with src/review.py confirm")
         row.update(status=args.status, status_note=args.note.strip(),
                    status_at=datetime.now(SHANGHAI).isoformat(timespec="seconds"))
         write_history(history)

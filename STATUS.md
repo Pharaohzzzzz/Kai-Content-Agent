@@ -14,7 +14,9 @@
 
 **P6 及 P6-R1 — PASS WITH LIMITATIONS**
 
-**P7 — AWAITING_GPT_REVIEW**
+**P7 — PASS WITH LIMITATIONS**
+
+**P8 — AWAITING_GPT_REVIEW**
 
 GPT 已验收 P0 基线 `5a59e6d27486587e5eee7dfe5493b08658828579`。项目位于 Windows 真实桌面 `D:\Desktop\Kai-Content-Agent`，原始环境检查与初始化证据保留在 P0 提交。
 
@@ -143,3 +145,19 @@ GPT 正式结论为 **PASS WITH LIMITATIONS**。P7 获准使用基线 4c60114 �
 - 对 output/p6-ai-reliability-v2/ 完成一次真实双平台打包。脚本记录 1.588 秒，CLI 墙钟 1.835 秒。原 MP4 完整解码一次，两平台各按字节复制，原成品 9 个文件的 SHA-256 保持一致。
 - 抖音沿用原封面。小红书采用居中 3:4 裁切，并交付 6 张 1080×1440 独立图文卡片，逐张目视检查无明显溢出。文案沿用一张虚构报价单、四种问法各一次的实验边界及 HFE 技术报告来源。
 - 对 output/p4-review/ 进行 A 线清单接口检查，识别 ai-support-net-time、P2 计划、素材权利、AI 标识和合成示例风险。该检查只读取清单和关联计划。交付及审核证据见 [P7-REVIEW.txt](P7-REVIEW.txt)。
+
+## P7 正式审核结论
+
+GPT 结论为 **PASS WITH LIMITATIONS**，批准进入 P8。由 `git log -1 -- P7-REVIEW.txt` 核对的实际 P7 检查点为 `7b93cf4ea87e0ed367ed1c5a0e02f700f38b296a`，开始 P8 时为 HEAD，直接父提交为 `4c601145eea8865c89d91cbefefdb0b0c5cef0bf`。
+
+- A 线仅完成接口兼容性检查。
+- 六张小红书图文卡片尚未经 GPT 独立目视审核。
+- 平台尺寸和安全区域属于项目建议值。
+- 事实、权利及平台实机检查仍需人工终审。
+
+## P8 实际结果
+
+- 新增 `src/review.py`、`kai-review` 及 CSV 录入模板。相关选题的发布明细与 P5 选题状态共用原历史，运营快照通过 CSV 或 JSONL 手动导入。本机 Codex CLI 0.171.0 的 `skills/list` 已发现并启用 `kai-review`。
+- 使用 P7 既有发布包登记抖音视频、小红书视频和小红书图文三条待发布记录。P5 选题保持 `produced`。真实报告显示本期确认发布 0 条、快照 0 条、暂无有效运营样本。
+- 使用独立模拟目录验证 4 条作品、7 次累计快照和 5 组比较，覆盖 24 小时、72 小时与 7 天目标窗口、时间偏差、同窗口重复采集、缺失字段、零分母、比率、分类中位数、工时和人民币净收益。临时模拟记录验证了 P5 选题状态联动及 A 线按片段关联，真实台账在模拟验收期间保持一致。
+- 真实空复盘在 `workspace/p8-operations/reports/p8-empty/`，模拟复盘在 `workspace/p8-simulation/reports/p8-demo/`，各含 Markdown 和 JSON。真实后台指标与实际商业转化尚无样本。平台口径及归因由用户依据后台填写，比较窗口的偏差和每项样本量在报告中显示。 [P8 审核文本](P8-REVIEW.txt)
