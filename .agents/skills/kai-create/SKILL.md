@@ -7,7 +7,7 @@ description: Produce an original Chinese vertical video for Kai's B line from a 
 
 在项目根目录读取 `AGENTS.md` 和 `STATUS.md`。从指定研究任务的 `topics.json` 提取对应 B 线条目，核对 `production_state=ready` 和素材权利。只补读脚本实际引用的一手依据。按真实进度记录选题状态。
 
-1. 写原创脚本，明确开场、证据、演示和结论。将文献结论、已完成的实测和编辑判断分别准确归因。实测先冻结提示、预期和评分规则，再收集独立的真实回复。保留完整原始记录。只有方法可演示时将 `mode` 设为 `method-demo-draft`，画面会显示草稿标识。
+1. 实测内容开场先展示具体问题或结果，用真实提示、原答节选和核算支撑口播，标清节选与重排。研究背景只保留解释当前问题所需的部分。画面随口播的信息点切换，时长由信息价值决定，事实准确性优先于传播效果。按原始记录和一手来源区分文献结论、实测和编辑判断。新实测先冻结提示、预期和评分规则，再独立收集并保存原始回复。只有方法可演示时使用 `mode=method-demo-draft`。
 2. 新建 `workspace/任务名/`，将脚本、场景、来源和授权写入 `storyboard.json`。把简明事实与实测摘要保存为相对路径的 Markdown。场景和音频字段见 [场景数据格式](references/storyboard.md)。
 3. 优先检查本机中文 Windows 语音。把 `narration` 切为完整短句，`spoken` 用实际发音写法，`subtitle` 可保留数字等书面形式。语音质量不足时，填入用户自有录音或每句在整段录音中的已校对时间。音频缺失或不可听时报告阻塞。
 4. 校验后渲染到新目录。默认 Kai 黑金、1080×1920、30 FPS、NVENC H.264 和 AAC。合成配音要标记 AI 生成内容。
