@@ -34,7 +34,7 @@ def asset_region(brand):
     return area(x, 490, WIDTH - safe["right"] - 10 - x, HEIGHT - safe["bottom"] - 760)
 
 
-def scene_events(brand, visual, duration_ms, disclosure, *, cover=False, draft=False):
+def scene_events(brand, visual, duration_ms, disclosure, *, cover=False, draft=False, canvas_height=None):
     safe, colors = brand["platform_ui_reserve"], brand["colors"]
     left = safe["left"] + 16
     right = WIDTH - safe["right"] - 10
@@ -57,6 +57,9 @@ def scene_events(brand, visual, duration_ms, disclosure, *, cover=False, draft=F
         box = area(x, y, w, round(size * 1.22) * lines)
         block = fit_text(value, box, style, preferred_lines=lines)
         require(len(block["lines"]) <= lines, f"Shorten this scene text or split it across lines: {value}")
+        if canvas_height is not None:
+            require(y + block_height(block) <= canvas_height - safe["bottom"],
+                    f"Card text extends below its safe area: {value}")
         for event in events_for_block(style_name, box, 0, duration_ms, block):
             if color:
                 event = event.replace(r"{\an7", rf"{{\an7\1c&H{ass_color(colors[color])[4:]}&", 1)

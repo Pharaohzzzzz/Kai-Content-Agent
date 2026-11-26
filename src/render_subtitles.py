@@ -184,11 +184,11 @@ def text_events(
     return events_for_block(name, box, start, end, block)
 
 
-def write_events(path: Path, brand: dict, events: list[str]) -> None:
+def write_events(path: Path, brand: dict, events: list[str], *, size=(WIDTH, HEIGHT)) -> None:
     header = f"""[Script Info]
 ScriptType: v4.00+
-PlayResX: {WIDTH}
-PlayResY: {HEIGHT}
+PlayResX: {size[0]}
+PlayResY: {size[1]}
 ScaledBorderAndShadow: yes
 WrapStyle: 2
 YCbCr Matrix: TV.709

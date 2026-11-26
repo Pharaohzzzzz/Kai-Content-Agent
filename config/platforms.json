@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-26",
+  "parameter_basis": "项目建议值。公开创作入口未提供可核实的普通创作者完整尺寸、上传限制和遮挡规范。最终以实际发布界面为准。",
+  "disclosure_basis": [
+    "https://www.cac.gov.cn/2025-03/14/c_1743654684782215.htm",
+    "https://trust.douyin.com/article/15868",
+    "https://legalinfo.moj.gov.cn/zhfxfzzx/fzzxyw/202510/t20251024_526793.html"
+  ],
+  "platforms": {
+    "douyin": {
+      "name": "抖音",
+      "creator_center": "https://creator.douyin.com/",
+      "video": {"ratio": [9, 16], "size": [1080, 1920], "container": "mp4", "video_codec": "h264", "audio_codec": "aac"},
+      "video_safe_area": {"left": 56, "top": 136, "right": 112, "bottom": 224},
+      "cover": {"ratio": [9, 16], "size": [1080, 1920]}
+    },
+    "xiaohongshu": {
+      "name": "小红书",
+      "creator_center": "https://creator.xiaohongshu.com/",
+      "video": {"ratio": [9, 16], "size": [1080, 1920], "container": "mp4", "video_codec": "h264", "audio_codec": "aac"},
+      "video_safe_area": {"left": 56, "top": 136, "right": 112, "bottom": 224},
+      "cover": {"ratio": [3, 4], "size": [1080, 1440]},
+      "cards": {
+        "ratio": [3, 4], "size": [1080, 1440], "count": [5, 7],
+        "safe_area": {"left": 56, "top": 104, "right": 72, "bottom": 80}
+      }
+    }
+  }
+}

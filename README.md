@@ -1,6 +1,6 @@
 # Kai Content Agent
 
-Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染、P4 品牌视觉、P5 日常选题研究和 P6 原创视频生产。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
+Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染、P4 品牌视觉、P5 日常选题研究、P6 原创视频生产和 P7 双平台发布准备。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
 
 ## Windows 环境
 
@@ -155,3 +155,17 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 配音可选已安装的 Windows 普通话语音。也可以提交自有录音，每句话一个文件，或指定每句在整段录音里的 `clip_ms`。字幕沿实际短句音频的样本边界放置。缺少可用配音时渲染报错。演示草稿和 AI 内容按故事板状态显示标识。
 
 交付 `video.mp4`、`cover.png`、带时间轴的 `storyboard.json`、`subtitles.ass`、`render_manifest.json`、`facts-and-test.md` 和复查关键帧。成片须由人工审核并手动发布。首条成片位于 `output/p6-ai-reliability/`。 [P6 审核文本](P6-REVIEW.txt)
+
+## P7 双平台发布准备
+
+使用 `$kai-publish` 为指定 A 线或 B 线成品生成抖音和小红书发布素材包。编辑稿字段见 [kai-publish](.agents/skills/kai-publish/SKILL.md)。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 src/publish.py 'output/成品目录' --inspect
+.\.venv\Scripts\python.exe -X utf8 src/publish.py 'output/成品目录' --editorial 'workspace/编辑稿.json' --output 'output/新发布包'
+```
+
+- 两平台各有 `video.mp4`、`cover.png` 和 `publish-copy.md`。从既有 MP4 按字节复制，清单保留原字幕与证据的路径和哈希。小红书可附 5–7 张独立卡片。
+- 视频、封面、图文和安全留边采用 [平台配置](config/platforms.json) 的项目建议值。人工终审时核对实际客户端裁切、遮挡和 AI 标识声明。
+- `publish_manifest.json` 记录来源、权利、标识、文件与审核状态。技术预览、权利不明、重大事实风险或事实待核时，仅写出 `blocked` 清单并返回退出码 2。正常打包标为 `awaiting_human_review` 并返回 0，由用户终审并手动发布。
+- P7 本地样例位于 `output/p7-ai-reliability-publish/`。 [P7 审核文本](P7-REVIEW.txt)
