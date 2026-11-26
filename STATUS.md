@@ -16,7 +16,9 @@
 
 **P7 — PASS WITH LIMITATIONS**
 
-**P8 — AWAITING_GPT_REVIEW**
+**P8 — PASS WITH LIMITATIONS**
+
+**P9 — AWAITING_GPT_REVIEW**
 
 GPT 已验收 P0 基线 `5a59e6d27486587e5eee7dfe5493b08658828579`。项目位于 Windows 真实桌面 `D:\Desktop\Kai-Content-Agent`，原始环境检查与初始化证据保留在 P0 提交。
 
@@ -161,3 +163,15 @@ GPT 结论为 **PASS WITH LIMITATIONS**，批准进入 P8。由 `git log -1 -- P
 - 使用 P7 既有发布包登记抖音视频、小红书视频和小红书图文三条待发布记录。P5 选题保持 `produced`。真实报告显示本期确认发布 0 条、快照 0 条、暂无有效运营样本。
 - 使用独立模拟目录验证 4 条作品、7 次累计快照和 5 组比较，覆盖 24 小时、72 小时与 7 天目标窗口、时间偏差、同窗口重复采集、缺失字段、零分母、比率、分类中位数、工时和人民币净收益。临时模拟记录验证了 P5 选题状态联动及 A 线按片段关联，真实台账在模拟验收期间保持一致。
 - 真实空复盘在 `workspace/p8-operations/reports/p8-empty/`，模拟复盘在 `workspace/p8-simulation/reports/p8-demo/`，各含 Markdown 和 JSON。真实后台指标与实际商业转化尚无样本。平台口径及归因由用户依据后台填写，比较窗口的偏差和每项样本量在报告中显示。 [P8 审核文本](P8-REVIEW.txt)
+
+## P9 集成与验收证据
+
+2026-11-26 北京时间。GPT 批准从 `73ab8e7daa047539110d654f166e84a97350b8e3` 进入 P9，已核对 P7 检查点 `7b93cf4ea87e0ed367ed1c5a0e02f700f38b296a`。
+
+- `kai-content-agent` 由本机 Codex Desktop 的 `0.171.0-alpha.13.2` app-server 实测发现。`daily` 和 `research` 复用同日 P5 结果验证路由，前者到单选题交接，后者在简报结束。`produce` 执行 A/B 两线验收，`review` 生成真实空台账复盘。`src/task.py` 在 `workspace/kai-tasks/` 保存 JSON 检查点、耗时、阻塞和产物身份。
+- P8-L01 在隔离台账中验证批量带工时和成本时拒绝写入，逐条分摊可录入。P8-L02 验证无发布明细的 `produced` 选题也无法经 P5 直写 `published`，P8 `confirm` 保留显式确认门槛。
+- B 线以 P5 第二条选题生成《AI 省下的时间，后来是谁补回去的？》。六场，58.700 秒，1080×1920、30 fps、H.264/AAC。渲染 8.174 秒，含本机普通话配音 0.918 秒，P7 打包和完整解码 1.384 秒。12 句字幕与短句时间轴匹配，实际音轨复转写覆盖关键数字及结尾。工时示例为虚构演算，律所转述来自一手访谈。目视检查正片代表帧、封面和五张图卡。三条 P8 待发布记录覆盖抖音视频、小红书视频及图文。 [成品](output/p9-ai-handoff/video.mp4) · [发布清单](output/p9-ai-handoff-publish/publish_manifest.json)
+- A 线使用已有的项目自有合成访谈样片。复用 P3 转写、P2 分析和 P4 成片，P7 完整解码并双平台打包，P8 在隔离的模拟台账登记两条 `sim-` 记录。模拟清单在 `workspace/p8-simulation/p9-a-package/`。旧 P1 标记 `legacy_unrecorded`。另在独立副本复用同一份转写，走新导入 SHA-256 写入路径，实际渲染 CLI 拒绝指纹不同的副本。
+- 对 B 线完成任务恢复一次，耗时 0.203 秒。28 个文件的 SHA-256 与修改时间一致，下一阶段为空。真实周报在新 B 线登记前生成，报告当时有三条待发布，实发与快照均为零。B 线登记后真实台账有六条待发布。 [当期复盘](workspace/p8-operations/reports/p9-real-review/review.md)
+
+真实访谈、真实中文原声和复杂背景音的 A 线质量仍待验证。B 线采用合成配音和本地图表，真人录音、人工终审听感、平台实机遮挡和实际运营数据仍待验证。P4 字幕适配和平台安全区仍采用本地估算。公开研究源的稳定性、跨语去重、AIHOT 书面授权和 Gemini 真实人工交接仍有既有限制。V1.0 最终结论等待 GPT 审核。 [日常使用](README.md#日常使用) · [P9 审核文本](P9-REVIEW.txt)

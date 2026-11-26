@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from media import extract_audio, probe
+from media import extract_audio, probe, sha256
 from transcribe import transcribe, write_srt
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -25,6 +25,7 @@ def process(args: argparse.Namespace) -> None:
     if workspace not in output.parents:
         raise ValueError(f"Choose a new task directory under {workspace}.")
 
+    source_hash = sha256(source)
     metadata, audio_index, origin_us = probe(source, args.audio_stream)
     timeline = {
         "reference": "source_playback",
@@ -42,7 +43,9 @@ def process(args: argparse.Namespace) -> None:
         write_json(staged / "media.json", {
             "schema_version": 1,
             "source_media": str(source),
+            "source_sha256": source_hash,
             "source": args.source or source.as_uri(),
+            "synthetic_test": args.synthetic_test,
             "rights_status": args.rights,
             "ai_label": args.ai_label,
             **metadata,
@@ -55,6 +58,8 @@ def process(args: argparse.Namespace) -> None:
         )
         write_json(staged / "transcript.json", transcript)
         write_srt(staged / "transcript.srt", transcript["segments"])
+        if sha256(source) != source_hash:
+            raise ValueError("Original media changed during import. Use a stable source file.")
         if output.exists() or output.is_symlink():
             raise FileExistsError(f"Task output already exists: {output}")
         staged.rename(output)
@@ -75,6 +80,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="New task directory under workspace")
     parser.add_argument("--rights", required=True, choices=("owned", "authorized"), help="Confirmed source rights")
     parser.add_argument("--source", help="Provenance, such as a source URL or recording note")
+    parser.add_argument("--synthetic-test", action="store_true", help="Identify synthetic acceptance media")
     parser.add_argument("--ai-label", choices=("required", "not-required", "unknown"), default="unknown")
     parser.add_argument("--audio-stream", type=int, help="Absolute FFprobe stream index")
     parser.add_argument("--model", default="small", help="faster-whisper model name")

@@ -1,0 +1,1048 @@
+Kai Content Agent — P9 — AWAITING_GPT_REVIEW
+
+一、实际验收证据
+
+运行条件与计时
+{
+  "baseline": "73ab8e7daa047539110d654f166e84a97350b8e3",
+  "p7_checkpoint": "7b93cf4ea87e0ed367ed1c5a0e02f700f38b296a",
+  "initial_status": "main; untracked P4-CODE-REVIEW.txt",
+  "as_of_shanghai": "2026-11-26T10:53:23+08:00",
+  "phase_wall_seconds_as_of": 943.726,
+  "codex_local_token_usage_as_of": {
+    "timestamp": "2026-11-26T02:52:38.825Z",
+    "input_tokens": 4316310,
+    "cached_input_tokens": 4183040,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 39214,
+    "reasoning_output_tokens": 10187,
+    "total_tokens": 4355524
+  },
+  "token_usage_scope": "本会话本机日志截至该采样的累计计数，含缓存及推理分项。阶段级和结算数字不可用。",
+  "stage_seconds_or_elapsed_between_checkpoints": {
+    "p9-route-research": [
+      {
+        "stage": "collect",
+        "seconds": 180.036,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "research",
+        "seconds": 0.227,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      }
+    ],
+    "p9-route-daily": [
+      {
+        "stage": "collect",
+        "seconds": 180.661,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "research",
+        "seconds": 0.21,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      }
+    ],
+    "p9-a-synthetic": [
+      {
+        "stage": "ingest",
+        "seconds": 59.683,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "analysis",
+        "seconds": 0.369,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "render",
+        "seconds": 0.215,
+        "reused": true,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "package",
+        "seconds": 30.895,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "register",
+        "seconds": 0.422,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": null
+      }
+    ],
+    "p9-b-handoff": [
+      {
+        "stage": "storyboard",
+        "seconds": 147.996,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "render",
+        "seconds": 8.174,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": 0.0
+      },
+      {
+        "stage": "package",
+        "seconds": 1.384,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": null
+      },
+      {
+        "stage": "register",
+        "seconds": 0.254,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": null
+      }
+    ],
+    "p9-real-review": [
+      {
+        "stage": "review",
+        "seconds": 0.264,
+        "reused": false,
+        "manual_minutes": null,
+        "cost_cny": null
+      }
+    ]
+  }
+}
+
+统一入口
+实际调用 Codex Desktop 内置 codex.exe 0.171.0-alpha.13.2 的 app-server stdio，通过 initialize 和 skills/list 返回下列条目。
+[
+  {
+    "name": "kai-analyze",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-analyze\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-content-agent",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-content-agent\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-create",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-create\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-design",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-design\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-publish",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-publish\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-render",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-render\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-research",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-research\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  },
+  {
+    "name": "kai-review",
+    "path": "D:\\Desktop\\Kai-Content-Agent\\.agents\\skills\\kai-review\\SKILL.md",
+    "enabled": true,
+    "scope": "repo"
+  }
+]
+research 与 daily 采用已验收的当日 P5 采集和简报。research 完成后 next_stage=null，daily 完成研究后 next_stage=select。实际核对日更单选后衔接 A/B 的路由。produce 跑 A/B，review 产出实台账周报。
+
+P8 定向验证各一次
+P8-L01 multi-record cost/time rejected; pre-existing ledger was byte-identical
+P8-L01 separate allocations retained: 2+5 min, 0.40+0.90 CNY
+P8-L02 legacy published rejected on a produced topic with no publication records; bytes unchanged
+P8-L02 P8 confirm still requires explicit user confirmation
+
+B 线新原创
+工作目录 workspace/p9-b-handoff/。成片 output/p9-ai-handoff/video.mp4。双平台发布 output/p9-ai-handoff-publish/。
+{
+  "topic_id": "p5-2026-11-26:measure-ai-handoff-work",
+  "title": "AI 省下的时间，后来是谁补回去的？",
+  "media": {
+    "duration_seconds": 58.7,
+    "size_bytes": 1621528,
+    "video": {
+      "codec_name": "h264",
+      "profile": "Main",
+      "width": 1080,
+      "height": 1920,
+      "pix_fmt": "yuv420p",
+      "avg_frame_rate": "30/1",
+      "bit_rate": "92115"
+    },
+    "audio": {
+      "codec_name": "aac",
+      "profile": "LC",
+      "sample_rate": "48000",
+      "channels": 1,
+      "bit_rate": "121731"
+    }
+  },
+  "voice": "Microsoft Huihui Desktop",
+  "render_times": {
+    "narration_seconds": 0.918,
+    "encoding_seconds": 6.742,
+    "production_seconds": 8.174
+  },
+  "review_frames": [
+    {
+      "file": "frame-01.png",
+      "scene_id": "hook",
+      "at_ms": 2055
+    },
+    {
+      "file": "frame-02.png",
+      "scene_id": "law-firm",
+      "at_ms": 17625
+    },
+    {
+      "file": "frame-03.png",
+      "scene_id": "ledger",
+      "at_ms": 36712
+    }
+  ],
+  "mp4_sha256": "32df09dca0795ed06669d06ff2f28afbf6badb1de85e93a6df11a8ab71293c37",
+  "package_seconds": 1.384,
+  "decode": "full_decode_once",
+  "transfer": "byte_for_byte_copy",
+  "platform_video_hashes": {
+    "douyin": "32df09dca0795ed06669d06ff2f28afbf6badb1de85e93a6df11a8ab71293c37",
+    "xiaohongshu": "32df09dca0795ed06669d06ff2f28afbf6badb1de85e93a6df11a8ab71293c37"
+  },
+  "xhs_cards": 5
+}
+目视检查开场、律所交接、虚构工时表、结尾、封面与五张图文卡。封面沿用模板，问题后半句重复出现。录音由本机合成，尚待人工听感及平台客户端检查。
+实际音轨复转写用离线 Whisper medium/CUDA。识别覆盖律所案例、5/2/12/7/14 分钟、比较方法及结尾，有少量同音误识别。12 个字幕时段与口播短句文本和采样时间轴对照，ASS 共 22 行，按同起止时间合并，与短句时轴偏差最多 5 ms。末尾静音约 0.176 秒（−40 dB）。
+事实边界和工时示例
+# 事实与示例
+
+- 一手来源为 Anthropic Research 于 2026-11-23 发布的 [Working with AI](https://www.anthropic.com/research/working-with-ai)。研究者对 Anthropic 的 58 家企业客户进行了 66 次访谈。本片只取「Top-down automation」章节的一例。
+- 按报告转述，某律所原流程由冲突检索人员运行搜索，将命中的记录交给律师。试点中律师可向 AI 助手发起请求，再由系统调用冲突检索软件。新流程让检索人员逐项处理潜在冲突，也会挑出此前常由律师处理的复杂情况。报告称员工抵触，项目搁置，律所恢复旧流程。报告基于访谈，没有提供该试点的工时或节省比例。
+- 旧版与新版客服工单工时均为虚构示例，单位为分钟／件。旧版 8＋2＋1＋1＝12。新版 3＋6＋3＋2＝14。起草少 5 分钟，复核、返工和交接合计多 7 分钟。假设两边以同一验收标准得到一件合格交付件。这里没有采集真实工单，也没有做用户实验或测算企业收益。
+- Kai 的做法是并列记录起草、复核、返工和交接人工时间，以同类合格交付件为分母，并同时检查漏检与退回。例中数字用来解释计算。全部视觉为自制文字和表格，使用本机普通话合成语音并带 AI 标识。
+
+A 线合成验收与媒体身份
+采用项目自有 inbox/p3-synthetic-timed.mp4。P2 实际验证通过，沿用 workspace/p3-real-chain/ 与 output/p4-review/。代表帧含合成测试及 AI 标识。
+{
+  "mode": "simulated",
+  "clip": "ai-support-net-time",
+  "seconds": 50.8,
+  "package": "workspace/p8-simulation/p9-a-package/publish_manifest.json",
+  "pack_seconds": 0.836,
+  "decode": "full_decode_once",
+  "transfer": "byte_for_byte_copy",
+  "ids": [
+    "sim-douyin-video-d6625bdfa92c2ed6",
+    "sim-xiaohongshu-video-d6625bdfa92c2ed6"
+  ]
+}
+真实包装预检标记合成来源为阻塞，真实登记入口拒绝隔离清单。双平台测试文案明确标注合成测试。
+原有 P1 身份为 legacy_unrecorded。独立副本单独验证首次导入记录和渲染入口拒绝。
+A hash check: fresh P1 import recorded SHA-256 7f8c835b755702a2aaf97f5bfaabd3be93f8a26b6bac99c3f04af70ca146327c; reused byte-identical P3 audio transcript
+A hash check: actual render CLI rejected altered bytes before encoding or creating output
+
+恢复与复盘
+{
+  "seconds": 0.203,
+  "fingerprinted_files": 28,
+  "unchanged_fields": [
+    "sha256",
+    "mtime_ns"
+  ],
+  "route": {
+    "task_path": "workspace/kai-tasks/p9-b-handoff/task.json",
+    "mode": "produce",
+    "identity": {
+      "topic_id": "p5-2026-11-26:measure-ai-handoff-work",
+      "line": "B",
+      "selection": {
+        "workspace/p5-2026-11-26/topics.json": "ec5d5105d3eb3cfcaad1198f8810f252d4b66bca1938b0502e5b5778591d6cb7"
+      }
+    },
+    "verified": [
+      "storyboard",
+      "render",
+      "package",
+      "register"
+    ],
+    "next_stage": null,
+    "invalid_file": null,
+    "hold": null
+  },
+  "new_pending": [
+    {
+      "id": "pub-douyin-video-092e182e5e14848c",
+      "platform": "douyin",
+      "format": "video"
+    },
+    {
+      "id": "pub-xiaohongshu-video-092e182e5e14848c",
+      "platform": "xiaohongshu",
+      "format": "video"
+    },
+    {
+      "id": "pub-xiaohongshu-note-092e182e5e14848c",
+      "platform": "xiaohongshu",
+      "format": "note"
+    }
+  ],
+  "real_statuses": {
+    "pending": 6
+  }
+}
+复盘使用真实台账，生成一次。快照时间早于本次 B 线登记，因此当时有 3 条待发布。本次新增后待发布合计 6 条。确认发布 0 条，后台快照 0 条。
+{
+  "report": "workspace/p8-operations/reports/p9-real-review/review.json",
+  "data_mode": "real",
+  "facts": {
+    "pending_records": 3,
+    "published_in_period": 0,
+    "sample_works": 0,
+    "eligible_snapshots": 0
+  },
+  "period": {
+    "start": "2026-11-23",
+    "through": "2026-11-29",
+    "timezone": "Asia/Shanghai",
+    "as_of": "2026-11-26T10:46:28+08:00"
+  }
+}
+
+二、主控 Skill 正文
+
+---
+name: kai-content-agent
+description: Kai Content Agent 的日常主入口。用 daily 做当日研究与至多一条视频，用 research 仅研究，用 produce 按选题或合法本地素材制作，用 review 导入后台数据与复盘，也可按任务 ID 恢复。
+---
+
+# Kai Content Agent
+
+在本仓库的 Codex 会话中使用。读 `AGENTS.md`、`STATUS.md` 和 [日常使用](../../../README.md#日常使用)。下列 Skill 是当前会话按需读取并执行的流程说明。Codex 直接运行它们列出的本地 CLI。以北京时间安排研究，使用现有模型、Python 和 FFmpeg。
+
+## 模式
+
+| 请求示例 | 实际路由 |
+| --- | --- |
+| `$kai-content-agent daily` | 当日研究 → 从已核查候选中选一条 → 对应 A/B 线 → 双平台打包 → 待发布登记 |
+| `$kai-content-agent research` | 当日研究 → 简报及候选推荐 |
+| `$kai-content-agent produce p5-2026-11-26:measure-ai-handoff-work` | 复用该完整选题 ID 的研究交接 → 对应 A/B 线 → 双平台打包 → 待发布登记 |
+| `$kai-content-agent produce inbox/interview.mp4，素材自有，来源为本人录制，AI 标识待定` | 核对来源、权利和 AI 标识 → A 线本地生产 → 双平台打包 → 待发布登记 |
+| `$kai-content-agent review workspace/metrics.csv` | 导入用户提供的后台数据 → 真实台账复盘与策略建议。无文件时使用当前台账 |
+| `$kai-content-agent 恢复 <任务ID>` | 核对已有任务与最近有效检查点并继续其原模式 |
+
+## 任务和检查点
+
+用 `.\.venv\Scripts\python.exe -X utf8` 运行 `src/task.py` 及业务 CLI。新任务先执行 `src/task.py init <任务ID> <模式>`。`produce` 按输入加 `--topic <完整ID>` 或 `--media <路径> --rights owned|authorized --source <来源> --ai-label required|not-required|unknown`。测试素材显式加 `--synthetic-test`。任务 ID 用小写 ASCII、数字和连字符。
+
+先找用户指定或身份匹配的已有任务，执行 `src/task.py resume <任务ID>`。`verified` 给出已通过指纹检查的阶段，`next_stage` 为空即交付已有结果。阶段产物已落盘但检查点尚未写入时，先核对内容、状态和输入关联，再以 `--reused` 记录，避免重跑。若返回 `invalid_file`，从首个失效阶段继续。保留旧产物，重做时用新输出目录。原始输入变化时按报错恢复原输入或新建任务。可通过 `workspace/kai-tasks/<任务ID>/task.json` 找到输出与过去的阻塞记录。
+
+每个成功阶段执行 `src/task.py checkpoint <任务ID> <阶段> <主产物>`。主产物见下文。需要绑定附加证据、录音或审查记录时用 `--file <路径>`，参数可重复。以实测 `--seconds`、`--manual-minutes`、`--cost-cny` 和 `--note` 记录本阶段耗时、人工与新增成本，未知值留空。`--seconds` 缺省使用阶段间墙钟时间，包含等待。缺事实、素材、实测、权利、可用配音或发生失败时执行 `src/task.py hold <任务ID> "具体原因及恢复条件"`。
+
+## 执行
+
+1. **研究。** 按 [kai-research](../kai-research/SKILL.md) 采集、核事实、成稿、排序。研究名可用本任务 ID 或其短后缀。`collect` 记录 `sources.json`，`research` 在 `finalize` 和 `validate` 后记录 `topics.json`。`research` 模式交付简报及候选即结束。`daily` 优先选择排序最高且尚未制作、事实与素材均满足并已完成必要实测的候选。任何必要证据缺失就寻找下一位合格候选，全部缺失则暂停。本次只绑定一条，执行 `checkpoint <任务ID> select <同一topics.json> --topic <完整ID>`。
+2. **A 线。** 从研究交接或用户处取权利明确的源媒体。采用现有 `src/preprocess.py` 写入新 P1 目录，沿用已配环境、`medium / cuda / float16` 和 `--word-timestamps`，并填写来源和 AI 标识。合成验收素材也在 P1 用 `--synthetic-test`。复用旧 P1 时核对素材身份、选轨、时间轴和来源，历史上无导入哈希如实记为 `legacy_unrecorded`。`ingest` 记录 `media.json`。按 [kai-analyze](../kai-analyze/SKILL.md) 分析及校验指定版本，`analysis` 记录 `edit_plan.json`。没有可用候选或原创解读仍待完善时暂停。依 [kai-design](../kai-design/SKILL.md) 检查画面、字幕、原创解读和封面，按需做静态预览。按 [kai-render](../kai-render/SKILL.md) 生产完整审核候选，`render` 记录 `render_manifest.json`。复用时要求 P1 和 P2 哈希、源媒体、剪辑和渲染状态相符。
+3. **B 线。** 读 [kai-create](../kai-create/SKILL.md)，用已核实的 P5 交接写原创口播、场景和事实记录。实测必须有原始记录，演示场景的虚构数字需在口播和画面标明。已完成且身份匹配的故事板、源证据和成品可直接检查并收录。`storyboard` 记录校验通过的候选 `storyboard.json`，`render` 记录原版成品 `render_manifest.json`。检查代表画面、字幕与实际配音、事实和标识。若紧接 P7 打包，由 P7 执行一次完整解码，否则按渲染 Skill 做一次。
+4. **发布准备。** 按 [kai-publish](../kai-publish/SKILL.md) 查验成品和写双平台文案，有独立图文价值才制作小红书卡片。若 A 线来自 P5 选题，在 P7 编辑稿带 `topic_id`，CLI 会比对媒体、权利和 AI 标识。`package` 记录 `publish_manifest.json`。遇 `blocked` 保存原因并暂停。真实 P5 选题开始生产时从 `candidate` 标记 `selected`，交付经验证的发布候选后从 `selected` 标记 `produced`，保留已经达到或超过该状态的记录。用 `src/review.py register <清单> --category <内容分类>` 创建待发布记录，将其 JSON 输出保存为任务收据，`register` 记录该收据。登记多条时工时、成本留在任务账本，需写运营记录时按平台与形式分别录入。合成 A 线只用 `src/publish.py ... --simulate --output workspace/p8-simulation/<新目录>`，再用 `src/review.py --simulate register`，文案和台账均标测试。
+5. **复盘。** 按 [kai-review](../kai-review/SKILL.md) 用 `src/review.py import` 导入用户提供的 CSV 或 JSONL，用 `report --name <任务ID>` 生成真实报告。`review` 记录 `review.json`，有导入时用 `--file` 附项目内数据源。报告用实际可比样本提策略，缺样本时保留空数据结论。
+
+四种模式都只在本地处理和准备。用户人工终审、检查客户端、手动发布，并明确确认真实作品信息之后才可按 README 单独运行 `src/review.py confirm`。Gemini 为可选人工交接，沿用研究与分析 Skill 的本地审核包。
+
+三、核心代码差异（相对于指定验收基线）
+
+diff --git a/src/analysis_plan.py b/src/analysis_plan.py
+index 2462b52..aef4400 100644
+--- a/src/analysis_plan.py
++++ b/src/analysis_plan.py
+@@ -45,6 +45,9 @@ def load_source(task: Path) -> dict:
+     )
+     source_path = required_text(media["source_media"], "source_media")
+     source_name = required_text(media["source"], "source")
++    source_hash = media.get("source_sha256")
++    require("source_sha256" not in media or (isinstance(source_hash, str) and re.fullmatch(r"[0-9a-f]{64}", source_hash)),
++            "Invalid source SHA-256 in P1 media.json.")
+     require(media["ai_label"] in ("required", "not-required", "unknown"), "Invalid P1 AI label.")
+     audio_index = media["selected_audio_index"]
+     require(type(audio_index) is int and audio_index >= 0, "Invalid selected audio stream index.")
+@@ -71,6 +74,8 @@ def load_source(task: Path) -> dict:
+         previous_start, previous_end = start, end
+     return {
+         "source_media": source_path,
++        "source_sha256": source_hash,
++        "synthetic_test": media.get("synthetic_test", False) or "synthetic test" in source_name.lower(),
+         "source": source_name,
+         "rights_status": media["rights_status"],
+         "ai_label": media["ai_label"],
+diff --git a/src/media.py b/src/media.py
+index 70e1585..3f1f224 100644
+--- a/src/media.py
++++ b/src/media.py
+@@ -1,5 +1,6 @@
+ """Probe a local source and extract timestamp-aligned speech audio."""
+
++import hashlib
+ import json
+ import subprocess
+ import wave
+@@ -9,6 +10,11 @@ from pathlib import Path
+ SAMPLE_RATE = 16_000
+
+
++def sha256(path: Path) -> str:
++    with path.open("rb") as stream:
++        return hashlib.file_digest(stream, "sha256").hexdigest()
++
++
+ def run_media_tool(command: list[str]) -> str:
+     try:
+         result = subprocess.run(
+diff --git a/src/preprocess.py b/src/preprocess.py
+index 6f1ddae..ddf5824 100644
+--- a/src/preprocess.py
++++ b/src/preprocess.py
+@@ -6,7 +6,7 @@ import sys
+ from pathlib import Path
+ from tempfile import TemporaryDirectory
+
+-from media import extract_audio, probe
++from media import extract_audio, probe, sha256
+ from transcribe import transcribe, write_srt
+
+ PROJECT = Path(__file__).resolve().parents[1]
+@@ -25,6 +25,7 @@ def process(args: argparse.Namespace) -> None:
+     if workspace not in output.parents:
+         raise ValueError(f"Choose a new task directory under {workspace}.")
+
++    source_hash = sha256(source)
+     metadata, audio_index, origin_us = probe(source, args.audio_stream)
+     timeline = {
+         "reference": "source_playback",
+@@ -42,7 +43,9 @@ def process(args: argparse.Namespace) -> None:
+         write_json(staged / "media.json", {
+             "schema_version": 1,
+             "source_media": str(source),
++            "source_sha256": source_hash,
+             "source": args.source or source.as_uri(),
++            "synthetic_test": args.synthetic_test,
+             "rights_status": args.rights,
+             "ai_label": args.ai_label,
+             **metadata,
+@@ -55,6 +58,8 @@ def process(args: argparse.Namespace) -> None:
+         )
+         write_json(staged / "transcript.json", transcript)
+         write_srt(staged / "transcript.srt", transcript["segments"])
++        if sha256(source) != source_hash:
++            raise ValueError("Original media changed during import. Use a stable source file.")
+         if output.exists() or output.is_symlink():
+             raise FileExistsError(f"Task output already exists: {output}")
+         staged.rename(output)
+@@ -75,6 +80,7 @@ def main() -> int:
+     parser.add_argument("--output", type=Path, required=True, help="New task directory under workspace")
+     parser.add_argument("--rights", required=True, choices=("owned", "authorized"), help="Confirmed source rights")
+     parser.add_argument("--source", help="Provenance, such as a source URL or recording note")
++    parser.add_argument("--synthetic-test", action="store_true", help="Identify synthetic acceptance media")
+     parser.add_argument("--ai-label", choices=("required", "not-required", "unknown"), default="unknown")
+     parser.add_argument("--audio-stream", type=int, help="Absolute FFprobe stream index")
+     parser.add_argument("--model", default="small", help="faster-whisper model name")
+diff --git a/src/publish.py b/src/publish.py
+index 46f5a45..ee2cd37 100644
+--- a/src/publish.py
++++ b/src/publish.py
+@@ -16,6 +16,7 @@ from media import probe, run_media_tool
+ from render import new_output, sha256
+ from render_brand import DEFAULT_BRAND, WIDTH, ffmpeg_still, load_brand
+ from render_subtitles import write_events
++from research import ready_topic
+
+ CONFIG = PROJECT / "config" / "platforms.json"
+ OUTPUT = PROJECT / "output"
+@@ -30,13 +31,14 @@ def file_record(path, base, expected=None):
+     return {"path": relative.as_posix(), "sha256": digest}
+
+
+-def inspect_source(source):
++def inspect_source(source, simulate=False):
+     require(OUTPUT in source.parents, "Choose an existing deliverable under output/.")
+     manifest_path = source / "render_manifest.json"
+     raw = manifest_path.read_bytes()
+     render = json.loads(raw.decode("utf-8-sig"))
+     origin = {"path": manifest_path.relative_to(PROJECT).as_posix(), "sha256": hashlib.sha256(raw).hexdigest()}
+     blocks = []
++    synthetic = False
+     upstream_risks = render.get("content_risks", [])
+     checks = list(render.get("verification_needed", []))
+
+@@ -79,6 +81,8 @@ def inspect_source(source):
+                     "title": required_text(plan["title_zh"], "title_zh")}
+         evidence_record = None
+         original = render["source"]
++        synthetic = original.get("synthetic_test", False) or "synthetic test" in original["provenance"].lower()
++        identity["source_media"] = original["path"]
+         rights = [{"description": "访谈源素材", "rights": original.get("rights_status"),
+                    "origin": original.get("provenance"), "sha256": original.get("sha256")}]
+         sources = [{"title": "访谈源素材", "use": required_text(original["provenance"], "source provenance")}]
+@@ -95,6 +99,9 @@ def inspect_source(source):
+     else:
+         raise ValueError("Expected a Kai A- or B-line render_manifest.json.")
+
++    require(not simulate or synthetic, "Simulated packaging requires an A-line synthetic test render.")
++    if synthetic and not simulate:
++        blocks.append("A 线合成测试仅可打包到隔离的模拟目录。")
+     if ai is None:
+         blocks.append("AI 内容标识需求待核实。")
+     if human not in ("pending", "approved"):
+@@ -105,7 +112,7 @@ def inspect_source(source):
+         "media": media, "content_sources": sources, "material_rights": rights,
+         "ai_disclosure": {"required": ai, "note": ai_note},
+         "upstream_content_risks": upstream_risks, "upstream_review_items": checks,
+-        "blockers": blocks, "expected_hashes": hashes,
++        "blockers": blocks, "expected_hashes": hashes, "synthetic_test": synthetic,
+     }
+
+
+@@ -190,13 +197,23 @@ def card_files(entries, dest, parent, config, ai):
+     return records
+
+
+-def pack(source_dir, source, editorial_path, output):
++def pack(source_dir, source, editorial_path, output, simulate=False):
+     start = perf_counter()
+     config = read_json(CONFIG)
+     editorial = read_json(editorial_path)
+     editorial_record = file_record(editorial_path, PROJECT)
+     require(editorial["source_manifest_sha256"] == source["render"]["sha256"],
+             "Editorial brief must match this render manifest SHA-256.")
++    if source["lane"] == "A" and editorial.get("topic_id"):
++        topic, _ = ready_topic(editorial["topic_id"])
++        require(not simulate and topic["line"] == "A", "The publication topic must be a real A-line topic.")
++        interview = topic["production"]["interview"]
++        require((PROJECT / interview["local_path"]).resolve() == Path(source["source_media"]).resolve()
++                and interview["rights"] == source["material_rights"][0]["rights"]
++                and interview["ai_label"] == {True: "required", False: "not-required"}.get(source["ai_disclosure"]["required"]),
++                "A-line publication topic differs from the rendered source, rights or AI disclosure.")
++        require(source["topic_id"] in (None, topic["topic_id"]), "Rendered topic ID differs from the editorial topic.")
++        source["topic_id"] = topic["topic_id"]
+     fact = editorial["fact_review"]
+     require(fact["status"] in {"checked", "pending", "major_risk"}, "Choose a supported fact review status.")
+     required_text(fact["note"], "fact review note")
+@@ -206,6 +223,7 @@ def pack(source_dir, source, editorial_path, output):
+     hashes = source.pop("expected_hashes")
+     manifest = {
+         "schema_version": 1, "status": "blocked" if blockers else PENDING,
++        "data_mode": "simulated" if simulate else "real",
+         "source": source, "editorial": editorial_record, "fact_review": fact,
+         "platform_config": file_record(CONFIG, PROJECT),
+         "platform_parameter_basis": config["parameter_basis"],
+@@ -254,7 +272,11 @@ def pack(source_dir, source, editorial_path, output):
+                     declared = editorial.get("cards_ai_generated")
+                     require(type(declared) is bool, "Declare whether publication cards contain AI-generated material.")
+                     cards_ai_required = source["ai_disclosure"]["required"] or declared
+-                write_copy(dest / "publish-copy.md", name, editorial["platforms"][name], source, cards_ai_required)
++                copy = editorial["platforms"][name]
++                if simulate:
++                    copy = {**copy, "title": "【合成测试】" + copy["title"],
++                            "body": "仅供接口验收，禁止发布。\n\n" + copy["body"]}
++                write_copy(dest / "publish-copy.md", name, copy, source, cards_ai_required)
+                 files = {"video": file_record(dest / "video.mp4", stage, source["video.mp4"]["sha256"]),
+                          "cover": file_record(dest / "cover.png", stage),
+                          "copy": file_record(dest / "publish-copy.md", stage)}
+@@ -280,19 +302,27 @@ def main():
+     parser.add_argument("--inspect", action="store_true", help="Read the existing manifest and plan without producing files")
+     parser.add_argument("--editorial", type=Path, help="Local editorial brief JSON")
+     parser.add_argument("--output", type=Path, help="New direct child of project output/")
++    parser.add_argument("--simulate", action="store_true", help="Package synthetic A-line media in the P8 simulation workspace")
+     args = parser.parse_args()
+     try:
+         source = args.source.resolve()
+         if args.inspect:
+             require(args.editorial is None and args.output is None, "--inspect uses only the source directory.")
+-            print(json_text(inspect_source(source), indent=2))
++            print(json_text(inspect_source(source, args.simulate), indent=2))
+             return 0
+         require(args.editorial is not None and args.output is not None, "Provide --editorial and --output.")
+-        output = new_output(args.output)
+-        require(output.parent == OUTPUT, "Choose a new direct child of output/.")
++        if args.simulate:
++            output = args.output.resolve()
++            base = PROJECT / "workspace/p8-simulation"
++            require(not args.output.is_symlink() and not output.exists() and output.parent == base,
++                    f"Choose a new simulation package directly under {base}.")
++            base.mkdir(parents=True, exist_ok=True)
++        else:
++            output = new_output(args.output)
++            require(output.parent == OUTPUT, "Choose a new direct child of output/.")
+         editorial = args.editorial.resolve()
+         require(PROJECT in editorial.parents, "Keep the editorial brief inside the project.")
+-        return pack(source, inspect_source(source), editorial, output)
++        return pack(source, inspect_source(source, args.simulate), editorial, output, args.simulate)
+     except (KeyError, TypeError, ValueError, OSError, RuntimeError) as error:
+         print(f"Publish preparation failed: {error}", file=sys.stderr)
+         return 1
+diff --git a/src/render.py b/src/render.py
+index 50ea2c9..6f64903 100644
+--- a/src/render.py
++++ b/src/render.py
+@@ -12,7 +12,7 @@ from time import perf_counter
+
+ from analysis_plan import PROJECT, check_same, json_text, load_source, read_json, require, validate
+ from analysis_review import validate_review
+-from media import probe, run_media_tool
++from media import probe, run_media_tool, sha256
+ from render_brand import (
+     COVER_CROP_HEIGHT, COVER_CROP_Y, DEFAULT_BRAND, FPS, HEIGHT, WIDTH, color_input, compose,
+     extract_picture, ffmpeg_still, load_brand, render_still, source_layout,
+@@ -26,11 +26,6 @@ ENCODERS = {
+ }
+
+
+-def sha256(path: Path) -> str:
+-    with path.open("rb") as stream:
+-        return hashlib.file_digest(stream, "sha256").hexdigest()
+-
+-
+ def new_output(path: Path) -> Path:
+     require(not path.exists() and not path.is_symlink(), f"Render output already exists: {path}")
+     output = path.resolve()
+@@ -191,6 +186,9 @@ def render(args: argparse.Namespace) -> None:
+     require(source_path.is_file(), f"Original media must be a local file: {source_path}")
+     source_stat = source_path.stat()
+     source_hash = sha256(source_path)
++    import_hash = source["source_sha256"]
++    require(import_hash is None or source_hash == import_hash,
++            "Original media SHA-256 differs from the P1 import. Use the original media or start a new import.")
+     metadata, audio_index, origin_us = probe(source_path, plan["selected_audio_index"])
+     require(round(origin_us / 1000) == plan["source_timeline"]["source_pts_origin_ms"],
+             "The current source playback origin differs from the P1 timeline.")
+@@ -214,7 +212,7 @@ def render(args: argparse.Namespace) -> None:
+                 "--cover-time-ms must identify a playback time within a visual source.")
+     elif video_index is not None:
+         cover_ms = start + (end - start) // 3
+-    source_label = "合成测试" if "synthetic test" in plan["source"].lower() else ""
++    source_label = "合成测试" if source["synthetic_test"] else ""
+
+     output.parent.mkdir(parents=True, exist_ok=True)
+     with TemporaryDirectory(prefix=".p4-", dir=output.parent) as directory:
+@@ -267,6 +265,8 @@ def render(args: argparse.Namespace) -> None:
+             "schema_version": 2,
+             "source": {
+                 "path": str(source_path), "sha256": source_hash, "sha256_scope": "current_render_input",
++                "import_sha256": import_hash, "import_identity": "verified" if import_hash else "legacy_unrecorded",
++                "synthetic_test": source["synthetic_test"],
+                 "provenance": plan["source"], "rights_status": plan["rights_status"],
+                 "language": plan["source_language"], "video_stream_index": video_index,
+                 "selected_audio_stream_index": audio_index, "original_audio": audio_stream,
+diff --git a/src/research.py b/src/research.py
+index f8a038b..9d5e31a 100644
+--- a/src/research.py
++++ b/src/research.py
+@@ -68,6 +68,19 @@ def task_path(run_id):
+     return WORKSPACE / run_id
+
+
++def ready_topic(topic_id):
++    run_id, separator, _ = topic_id.partition(":")
++    if not separator:
++        raise ValueError("Use the full research topic ID: task:slug")
++    path = task_path(run_id) / "topics.json"
++    topic = next((item for item in read_json(path)["topics"] if item["topic_id"] == topic_id), None)
++    row = next((item for item in read_history() if item["topic_id"] == topic_id), None)
++    if (not topic or not row or row["status"] == "rejected" or topic["production_state"] != READY
++            or not topic["handoff"]["ready_to_prepare"]):
++        raise ValueError(f"Topic is missing, rejected or not ready for production: {topic_id}")
++    return topic, path
++
++
+ def collect(args):
+     task = task_path(args.task)
+     if task.exists():
+@@ -196,6 +209,8 @@ def history_status(args):
+         return
+     if not args.status or not args.note or not args.note.strip():
+         raise ValueError("Updating history requires a status and a note recording the actual progress")
++    if args.status == "published":
++        raise ValueError("Confirm the actual platform publication with src/review.py confirm")
+     with history_lock():
+         history = read_history()
+         row = next((row for row in history if row["topic_id"] == args.topic_id), None)
+@@ -205,8 +220,6 @@ def history_status(args):
+             raise ValueError("Finalize the research task before updating a topic status")
+         if args.status not in TOPIC_STATES[row["status"]]:
+             raise ValueError(f"Invalid status transition: {row['status']} to {args.status}")
+-        if args.status == "published" and row.get("publications"):
+-            raise ValueError("Confirm the actual platform publication with src/review.py confirm")
+         row.update(status=args.status, status_note=args.note.strip(),
+                    status_at=datetime.now(SHANGHAI).isoformat(timespec="seconds"))
+         write_history(history)
+diff --git a/src/review_data.py b/src/review_data.py
+index 9a7c316..01772e8 100644
+--- a/src/review_data.py
++++ b/src/review_data.py
+@@ -127,6 +127,8 @@ def candidates(args, operations):
+         raise ValueError("Use a complete P7 package marked awaiting_human_review")
+     manifest_sha = hashlib.sha256(raw).hexdigest()
+     source = manifest["source"]
++    if operations.mode == "real" and source.get("synthetic_test"):
++        raise ValueError("Synthetic test material cannot enter the real publication ledger")
+     lane = source["lane"]
+     topic_id = optional_text(source.get("topic_id"), "topic_id")
+     clip_id = optional_text(source.get("clip_id"), "clip_id")
+@@ -164,6 +166,8 @@ def candidates(args, operations):
+             })
+     if not records:
+         raise ValueError("The package does not contain the requested platform or format")
++    if len(records) > 1 and (minutes is not None or cost is not None):
++        raise ValueError("Allocate time and cost separately using --platform and --format for each publication")
+     return records
+
+
+diff --git a/src/task.py b/src/task.py
+new file mode 100644
+index 0000000..bffe91b
+--- /dev/null
++++ b/src/task.py
+@@ -0,0 +1,307 @@
++"""Record and resume the local stages coordinated by the Kai Content Agent skill."""
++
++import argparse
++import sys
++from datetime import datetime, timezone
++from pathlib import Path
++
++from analysis_plan import read_json, require
++from media import sha256
++from research import ROOT, WORKSPACE, atomic_write, history_lock, json_text, ready_topic, task_path
++from review_data import Operations, number
++
++
++MODES = ("daily", "research", "produce", "review")
++WORK = {"A": ("ingest", "analysis", "render"), "B": ("storyboard", "render")}
++BASE = WORKSPACE / "kai-tasks"
++
++
++def now():
++    return datetime.now(timezone.utc)
++
++
++def relative(path):
++    return path.resolve().relative_to(ROOT).as_posix()
++
++
++def files(paths):
++    return {relative(path): sha256(path) for path in paths}
++
++
++def media_identity(path, rights, ai_label, source, synthetic):
++    path = path.resolve(strict=True)
++    require(rights in ("owned", "authorized") and path.is_file(), "Use a local file with confirmed rights.")
++    return dict(path=str(path), sha256=sha256(path), rights=rights, ai_label=ai_label,
++                source=source or path.as_uri(), synthetic_test=synthetic)
++
++
++def topic_identity(topic_id, selected_from=None):
++    topic, path = ready_topic(topic_id)
++    require(selected_from is None or path.resolve() == selected_from.resolve(),
++            "Select a topic from this daily task's completed research.")
++    identity = {"topic_id": topic_id, "line": topic["line"], "selection": files([path])}
++    if topic["line"] == "A":
++        item = topic["production"]["interview"]
++        identity["media"] = media_identity(ROOT / item["local_path"], item["rights"], item["ai_label"],
++                                           item["media_url"], False)
++    return identity
++
++
++def changed(records):
++    for path, digest in records.items():
++        try:
++            if sha256(ROOT / path) == digest:
++                continue
++        except OSError:
++            pass
++        return path
++    return None
++
++
++def route(task, identity):
++    mode = task["mode"]
++    if mode == "review":
++        return ("review",)
++    stages = ("collect", "research") if mode in ("daily", "research") else ()
++    if mode == "research":
++        return stages
++    if mode == "daily":
++        stages += ("select",)
++    return stages + (*WORK[identity["line"]], "package", "register") if identity else stages
++
++
++def resume(task):
++    identity = task["input"]
++    if identity:
++        require(not (stale := changed(identity.get("selection", {}))), f"Original task selection changed: {stale}")
++    valid = {}
++    stale = None
++    for record in task["checkpoints"]:
++        if stale := changed(record["files"]):
++            break
++        valid[record["stage"]] = record
++        if record["stage"] == "select":
++            identity = record["selection"]
++    if identity:
++        if media := identity.get("media"):
++            require(not changed({media["path"]: media["sha256"]}), "Task source media changed. Restore it or start a new task.")
++        if identity.get("topic_id"):
++            ready_topic(identity["topic_id"])
++    stages = route(task, identity)
++    return valid, identity, next((stage for stage in stages if stage not in valid), None), stale
++
++
++def primary(records, stage):
++    return ROOT / records[stage]["artifact"]
++
++
++def matching_ref(ref, path):
++    require((ROOT / ref["path"]).resolve() == path.resolve() and sha256(path) == ref["sha256"],
++            f"Manifest and checkpoint disagree: {path}")
++
++
++def checked_files(base, records):
++    paths = []
++    for name, digest in records.items():
++        path = (base / name).resolve()
++        require(path.is_relative_to(base) and sha256(path) == digest, f"Artifact hash mismatch: {path}")
++        paths.append(path)
++    return paths
++
++
++def checkpoint_files(stage, path, identity, previous):
++    data = read_json(path)
++    base = path.parent
++    linked = []
++    details = {}
++    if stage == "collect":
++        require(path.name == "sources.json", "Checkpoint the P5 collection sources.json.")
++    elif stage == "research":
++        require(path == primary(previous, "collect").with_name("topics.json"), "Research must match the collected task.")
++        require(isinstance(data["topics"], list), "Use finalized P5 topics.")
++        linked = [base / "daily-brief.md"]
++    elif stage == "ingest":
++        media = identity["media"]
++        require(path.name == "media.json" and Path(data["source_media"]).resolve() == Path(media["path"])
++                and data["rights_status"] == media["rights"] and data["ai_label"] == media["ai_label"],
++                "P1 input differs from the task media, rights or AI label.")
++        require("source_sha256" not in data or media["sha256"] == data["source_sha256"], "P1 original media hash differs.")
++        synthetic = data.get("synthetic_test", False) or "synthetic test" in data["source"].lower()
++        require(synthetic == media["synthetic_test"], "P1 test status differs from the task.")
++        details["import_identity"] = "verified" if "source_sha256" in data else "legacy_unrecorded"
++        linked = [base / "transcript.json"]
++    elif stage == "analysis":
++        require(path.name == "edit_plan.json", "Checkpoint a validated P2 edit plan.")
++        plan_analysis = read_json(base / "analysis.json")
++        require(data["recommended_clip_id"] == plan_analysis["recommended_clip_id"], "P2 recommended clip changed.")
++        checked_files(primary(previous, "ingest").parent, plan_analysis["input_sha256"])
++        linked = [base / "analysis.json", base / "translation.json"]
++    elif stage == "storyboard":
++        require(data["topic_id"] == identity["topic_id"] and data["mode"] == "release-candidate",
++                "Use a release-candidate storyboard for the selected B-line topic.")
++        linked = [base / data["evidence"]]
++    elif stage == "render":
++        require(path.name == "render_manifest.json", "Checkpoint the render manifest.")
++        if identity["line"] == "A":
++            source = data["source"]
++            media = identity["media"]
++            edit = primary(previous, "analysis")
++            require(data["render_mode"] == "full" and not data.get("preview_only")
++                    and data["original_commentary"]["status"] == "review_candidate"
++                    and Path(source["path"]).resolve() == Path(media["path"]) and source["sha256"] == media["sha256"]
++                    and Path(data["p2"]["plan_path"]).resolve() == edit
++                    and data["p2"]["p1_input_sha256"] == read_json(edit.with_name("analysis.json"))["input_sha256"],
++                    "A render differs from the approved media and plan, or is a draft.")
++            checked_files(edit.parent, data["p2"]["sha256"])
++            linked = [base / "timeline.json", base / "cover-3x4.png"]
++            for entry in data["original_commentary"].get("inputs", {}).values():
++                audio_input = Path(entry["path"])
++                matching_ref(entry, audio_input)
++                linked.append(audio_input)
++        else:
++            require(data["topic_id"] == identity["topic_id"] and data["mode"] == "release-candidate",
++                    "B render differs from the selected topic or is a draft.")
++            storyboard = primary(previous, "storyboard")
++            matching_ref(data["storyboard"], storyboard)
++            require(sha256(base / "facts-and-test.md") == sha256(storyboard.parent / read_json(storyboard)["evidence"]),
++                    "Rendered evidence differs from the approved storyboard evidence.")
++            for asset in data["source_assets"].values():
++                source = Path(asset["path"])
++                matching_ref(asset, source)
++                linked.append(source)
++            linked += checked_files(ROOT, data["voice"].get("recording_sha256", {}))
++        linked += checked_files(base, data.get("artifacts_sha256", {}))
++        linked += [base / name for name in ("video.mp4", "cover.png", "subtitles.ass")]
++    elif stage == "package":
++        matching_ref(data["source"]["render"], primary(previous, "render"))
++        simulated = identity.get("media", {}).get("synthetic_test", False)
++        mode = "simulated" if simulated else "real"
++        require(data["status"] == "awaiting_human_review" and data.get("data_mode", "real") == mode
++                and data["source"]["lane"] == identity["line"] and data["source"]["topic_id"] == identity.get("topic_id")
++                and set(data["platforms"]) == {"douyin", "xiaohongshu"}, "Package is incomplete, blocked or misidentified.")
++        for platform in data["platforms"].values():
++            entries = [platform["files"][key] for key in ("video", "cover", "copy")]
++            entries += platform.get("cards", {}).get("files", [])
++            linked += checked_files(base, {row["path"]: row["sha256"] for row in entries})
++    elif stage == "register":
++        package = primary(previous, "package")
++        simulated = identity.get("media", {}).get("synthetic_test", False)
++        require(isinstance(data, list) and data, "Save the P8 register output as a JSON receipt.")
++        operations = Operations(simulated)
++        with operations.lock:
++            _, _, ledger = operations.publications()
++        digest = sha256(package)
++        ids = {row["publication_id"] for row in data}
++        require(ids == {key for key, (row, _) in ledger.items() if row["publish_manifest"]["sha256"] == digest}
++                and {ledger[key][0]["platform"] for key in ids} == {"douyin", "xiaohongshu"},
++                "Receipt does not cover the two platforms in the correct P8 ledger.")
++        for row in data:
++            saved = ledger[row["publication_id"]][0]
++            matching_ref(row["publish_manifest"], package)
++            require(row["publish_manifest"] == saved["publish_manifest"] and row["data_mode"] == operations.mode,
++                    "Receipt differs from the recorded publication.")
++        details["publication_ids"] = sorted(ids)
++    elif stage == "review":
++        require(path.name == "review.json" and data["data_mode"] == "real"
++                and path.is_relative_to(WORKSPACE / "p8-operations/reports"), "Use a real P8 review report.")
++        linked = [base / "review.md"]
++    return [path, *linked], details
++
++
++def init(args):
++    identity = None
++    require((args.mode == "produce") == bool(args.topic or args.media), "Produce requires a topic ID or local media.")
++    require(args.media or not (args.rights or args.source or args.synthetic_test or args.ai_label != "unknown"),
++            "Media options require --media.")
++    if args.topic:
++        identity = topic_identity(args.topic)
++    if args.media:
++        identity = dict(line="A", media=media_identity(args.media, args.rights, args.ai_label,
++                                                      args.source, args.synthetic_test))
++    task = dict(schema_version=1, task_id=args.task_id, mode=args.mode, input=identity, checkpoints=[],
++                created_at=now().isoformat(), hold=None)
++    task["next_stage"] = route(task, identity)[0]
++    return task
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    commands = parser.add_subparsers(dest="command", required=True)
++    begin = commands.add_parser("init", help="Create a task with an immutable mode and input")
++    begin.add_argument("task_id")
++    begin.add_argument("mode", choices=MODES)
++    binding = begin.add_mutually_exclusive_group()
++    binding.add_argument("--topic")
++    binding.add_argument("--media", type=Path)
++    begin.add_argument("--rights", choices=("owned", "authorized"))
++    begin.add_argument("--ai-label", choices=("required", "not-required", "unknown"), default="unknown")
++    begin.add_argument("--source")
++    begin.add_argument("--synthetic-test", action="store_true")
++    view = commands.add_parser("resume", help="Return the verified stages and next action without running production")
++    view.add_argument("task_id")
++    stop = commands.add_parser("hold", help="Record a pending action or failure at the current stage")
++    stop.add_argument("task_id")
++    stop.add_argument("reason")
++    save = commands.add_parser("checkpoint", help="Verify and record a stage's completed artifact")
++    save.add_argument("task_id")
++    save.add_argument("stage")
++    save.add_argument("artifact", type=Path)
++    save.add_argument("--topic", help="Selected full topic ID for the daily select stage")
++    save.add_argument("--file", type=Path, action="append", default=[], help="Additional project-local dependency or evidence")
++    save.add_argument("--seconds", help="Measured stage wall time; defaults to elapsed time since the previous checkpoint")
++    save.add_argument("--reused", action="store_true", help="Record adoption and verification of existing outputs")
++    save.add_argument("--note")
++    save.add_argument("--manual-minutes")
++    save.add_argument("--cost-cny")
++    args = parser.parse_args()
++
++    try:
++        directory = BASE / task_path(args.task_id).name
++        path = directory / "task.json"
++        with history_lock(path):
++            if args.command == "init":
++                require(not path.exists(), "Task exists. Use resume with the same task ID.")
++                atomic_write(path, json_text(init(args)))
++            task = read_json(path)
++            previous, identity, stage, stale = resume(task)
++            if args.command == "hold":
++                require(stage is not None, "Completed tasks have no pending stage.")
++                task["hold"] = dict(stage=stage, reason=args.reason, at=now().isoformat())
++                atomic_write(path, json_text(task))
++            if args.command == "checkpoint":
++                require(stage == args.stage, f"Expected stage {stage}, received {args.stage}.")
++                at = now()
++                artifact = args.artifact.resolve(strict=True)
++                if stage == "select":
++                    require(bool(args.topic) and artifact == primary(previous, "research"), "Select from the verified topics.json.")
++                    details = {"selection": topic_identity(args.topic, artifact)}
++                    outputs = [artifact]
++                else:
++                    require(args.topic is None, "--topic is only applicable to the select stage.")
++                    outputs, details = checkpoint_files(stage, artifact, identity, previous)
++                last = task["checkpoints"][len(previous) - 1]["completed_at"] if previous else task["created_at"]
++                seconds = number(args.seconds, "seconds")
++                if seconds is None:
++                    seconds = (at - datetime.fromisoformat(last)).total_seconds()
++                item = dict(stage=stage, artifact=relative(artifact), files=files([*outputs, *args.file]),
++                            completed_at=at.isoformat(), seconds=round(seconds, 3), reused=args.reused, note=args.note,
++                            manual_minutes=number(args.manual_minutes, "manual_minutes"),
++                            cost_cny=number(args.cost_cny, "cost_cny", money=True), **details)
++                if task["hold"]:
++                    item["resolved_hold"] = task["hold"]
++                previous[stage] = item
++                identity = details.get("selection", identity)
++                stage = next((name for name in route(task, identity) if name not in previous), None)
++                task.update(checkpoints=list(previous.values()), next_stage=stage, hold=None)
++                atomic_write(path, json_text(task))
++                stale = None
++            print(json_text(dict(task_path=relative(path), mode=task["mode"], identity=identity,
++                                 verified=list(previous), next_stage=stage, invalid_file=stale, hold=task["hold"])), end="")
++    except (OSError, ValueError, KeyError, AttributeError, TypeError) as error:
++        print(f"Kai task error: {error}", file=sys.stderr)
++        return 1
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

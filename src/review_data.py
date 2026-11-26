@@ -127,6 +127,8 @@ def candidates(args, operations):
         raise ValueError("Use a complete P7 package marked awaiting_human_review")
     manifest_sha = hashlib.sha256(raw).hexdigest()
     source = manifest["source"]
+    if operations.mode == "real" and source.get("synthetic_test"):
+        raise ValueError("Synthetic test material cannot enter the real publication ledger")
     lane = source["lane"]
     topic_id = optional_text(source.get("topic_id"), "topic_id")
     clip_id = optional_text(source.get("clip_id"), "clip_id")
@@ -164,6 +166,8 @@ def candidates(args, operations):
             })
     if not records:
         raise ValueError("The package does not contain the requested platform or format")
+    if len(records) > 1 and (minutes is not None or cost is not None):
+        raise ValueError("Allocate time and cost separately using --platform and --format for each publication")
     return records
 
 

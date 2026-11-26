@@ -1,5 +1,6 @@
 """Probe a local source and extract timestamp-aligned speech audio."""
 
+import hashlib
 import json
 import subprocess
 import wave
@@ -7,6 +8,11 @@ from decimal import Decimal
 from pathlib import Path
 
 SAMPLE_RATE = 16_000
+
+
+def sha256(path: Path) -> str:
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def run_media_tool(command: list[str]) -> str:

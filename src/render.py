@@ -12,7 +12,7 @@ from time import perf_counter
 
 from analysis_plan import PROJECT, check_same, json_text, load_source, read_json, require, validate
 from analysis_review import validate_review
-from media import probe, run_media_tool
+from media import probe, run_media_tool, sha256
 from render_brand import (
     COVER_CROP_HEIGHT, COVER_CROP_Y, DEFAULT_BRAND, FPS, HEIGHT, WIDTH, color_input, compose,
     extract_picture, ffmpeg_still, load_brand, render_still, source_layout,
@@ -24,11 +24,6 @@ ENCODERS = {
     "h264_nvenc": ("-preset", "p5", "-rc", "vbr", "-cq", "21", "-b:v", "0"),
     "libx264": ("-preset", "medium", "-crf", "19"),
 }
-
-
-def sha256(path: Path) -> str:
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def new_output(path: Path) -> Path:
@@ -191,6 +186,9 @@ def render(args: argparse.Namespace) -> None:
     require(source_path.is_file(), f"Original media must be a local file: {source_path}")
     source_stat = source_path.stat()
     source_hash = sha256(source_path)
+    import_hash = source["source_sha256"]
+    require(import_hash is None or source_hash == import_hash,
+            "Original media SHA-256 differs from the P1 import. Use the original media or start a new import.")
     metadata, audio_index, origin_us = probe(source_path, plan["selected_audio_index"])
     require(round(origin_us / 1000) == plan["source_timeline"]["source_pts_origin_ms"],
             "The current source playback origin differs from the P1 timeline.")
@@ -214,7 +212,7 @@ def render(args: argparse.Namespace) -> None:
                 "--cover-time-ms must identify a playback time within a visual source.")
     elif video_index is not None:
         cover_ms = start + (end - start) // 3
-    source_label = "合成测试" if "synthetic test" in plan["source"].lower() else ""
+    source_label = "合成测试" if source["synthetic_test"] else ""
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix=".p4-", dir=output.parent) as directory:
@@ -267,6 +265,8 @@ def render(args: argparse.Namespace) -> None:
             "schema_version": 2,
             "source": {
                 "path": str(source_path), "sha256": source_hash, "sha256_scope": "current_render_input",
+                "import_sha256": import_hash, "import_identity": "verified" if import_hash else "legacy_unrecorded",
+                "synthetic_test": source["synthetic_test"],
                 "provenance": plan["source"], "rights_status": plan["rights_status"],
                 "language": plan["source_language"], "video_stream_index": video_index,
                 "selected_audio_stream_index": audio_index, "original_audio": audio_stream,

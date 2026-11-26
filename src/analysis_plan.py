@@ -45,6 +45,9 @@ def load_source(task: Path) -> dict:
     )
     source_path = required_text(media["source_media"], "source_media")
     source_name = required_text(media["source"], "source")
+    source_hash = media.get("source_sha256")
+    require("source_sha256" not in media or (isinstance(source_hash, str) and re.fullmatch(r"[0-9a-f]{64}", source_hash)),
+            "Invalid source SHA-256 in P1 media.json.")
     require(media["ai_label"] in ("required", "not-required", "unknown"), "Invalid P1 AI label.")
     audio_index = media["selected_audio_index"]
     require(type(audio_index) is int and audio_index >= 0, "Invalid selected audio stream index.")
@@ -71,6 +74,8 @@ def load_source(task: Path) -> dict:
         previous_start, previous_end = start, end
     return {
         "source_media": source_path,
+        "source_sha256": source_hash,
+        "synthetic_test": media.get("synthetic_test", False) or "synthetic test" in source_name.lower(),
         "source": source_name,
         "rights_status": media["rights_status"],
         "ai_label": media["ai_label"],

@@ -1,6 +1,24 @@
 # Kai Content Agent
 
-Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染、P4 品牌视觉、P5 日常选题研究、P6 原创视频生产和 P7 双平台发布准备。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
+Kai 的本地短视频生产工具。A 线处理已授权访谈，B 线制作原创中文视频。项目规则和验收状态见 [AGENTS.md](AGENTS.md) 与 [STATUS.md](STATUS.md)。
+
+## 日常使用
+
+在 Codex Desktop 打开本地项目 `D:\Desktop\Kai-Content-Agent`，以该目录新建会话，用 `@` 选择 `kai-content-agent`。也可从项目根目录启动 Codex CLI，输入 `$kai-content-agent`。主控 Skill 是日常唯一推荐入口，本文后半部分保留各阶段 CLI 说明。 [主控 Skill](.agents/skills/kai-content-agent/SKILL.md) · [Codex Skill 文档](https://learn.chatgpt.com/docs/build-skills)
+
+| 模式 | 会话示例 | 交付 |
+| --- | --- | --- |
+| `daily` | `$kai-content-agent daily，做今天的内容` | 研究后最多制作一条合格选题，打包抖音和小红书，登记待发布。必要事实、实测、授权或素材缺失时暂停 |
+| `research` | `$kai-content-agent research，查今天最值得做的选题` | 当日简报、候选和首选建议 |
+| `produce` | `$kai-content-agent produce p5-2026-11-26:measure-ai-handoff-work` | 按完整选题 ID 续接对应生产线。也可给 `inbox/访谈.mp4`，并说明素材权利、来源和 AI 标识需求 |
+| `review` | `$kai-content-agent review workspace/metrics.csv，复盘本周` | 导入后台实际数据并生成报告。有可比样本时给策略建议。省略文件时使用当前真实台账 |
+
+- 自有或已明确授权的源素材放 `inbox/`。中间文件在 `workspace/`。成片和双平台发布包分别在 `output/` 的独立子目录内。包中各平台提供视频、封面和文案，小红书图文按内容需要生成。
+- 恢复时发送 `$kai-content-agent 恢复 <任务ID>`。状态在 `workspace/kai-tasks/<任务ID>/task.json`，可用 `src/task.py resume <任务ID>` 查看已核对的检查点、阻塞和下一阶段。先复用身份相符的产物。若指纹变化，从首个失效阶段以新路径补齐。源输入发生变化时恢复原文件或新建任务。
+- 老板终审事实、授权、字幕、真人听感、AI 声明和平台裁切后，在平台手动发布。之后明确告知 Codex 确已发布，并提供本地发布记录 ID、实际上线标题、带时区的发布时间以及作品 ID 或链接。真实状态由 `src/review.py confirm --confirmed-published` 登记。 [实际发布命令](#p8-运营数据反馈)
+- 从后台手动记录实际累计值，填入 [CSV 模板](.agents/skills/kai-review/assets/metrics-template.csv) 或同字段 JSONL，用 `review` 导入。指标留空代表缺失。真实后台无样本时报告保留空数据结论。 [指标及复盘口径](#数据录入)
+- Gemini 免费网页版是可选人工复核。研究用 `src/research.py gemini-prompt <研究任务>` 生成公开资料提示词。访谈须先获用户明确同意分享，再用 `src/analyze.py review-pack <P1任务> --allow-third-party-sharing` 生成审核包。由用户手动提交、取回及保存反馈，Codex 再对照原始来源逐条处置。 [研究流程](.agents/skills/kai-research/SKILL.md) · [访谈审核导入](.agents/skills/kai-analyze/SKILL.md)
+- 已知边界包括真实访谈、复杂音轨、真人录音、Gemini 真实交接和平台客户端遮挡仍待实测。日常研究受公开源访问影响。旧 P1 如无导入指纹记为 `legacy_unrecorded`，新导入保存原始媒体 SHA-256，由渲染校验。合成 A 线验收仅在模拟目录打包和登记。 [阶段及适用限制](STATUS.md)
 
 ## Windows 环境
 
@@ -49,7 +67,7 @@ CPU 备用配置为 `small / cpu / int8`。
 
 | 文件 | 内容 |
 | --- | --- |
-| `media.json` | 文件和流元数据、所选音轨、来源、授权、AI 标识需求和时间原点 |
+| `media.json` | 文件和流元数据、所选音轨、来源、授权、AI 标识需求、时间原点及新导入素材的 SHA-256 |
 | `audio.wav` | 16 kHz、单声道、16-bit PCM |
 | `transcript.json` | 语言、模型、设备、运行耗时和整数毫秒时间轴，可带词级时间戳 |
 | `transcript.srt` | 从 JSON 同一组段落生成的原文字幕 |
@@ -113,7 +131,7 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 | `render_manifest.json` | 素材和配置身份、构图、时间轴、编码、解读、封面来源和人工审核状态 |
 | `frame-*.png` | 正片抽帧，或在静态模式下用同一布局生成的预览 |
 
-原始媒体 SHA-256 从本次实际渲染输入计算。人工审核时播放视频并检查原意、画面、字幕、原创观点及 AI 标识。P4 运行证据见 [P4 审核文本](P4-REVIEW.txt)。
+渲染时计算原始媒体 SHA-256。存在 P1 导入指纹时须一致，否则拒绝渲染。缺历史指纹的旧任务在新渲染清单中标记 `legacy_unrecorded`。人工审核时播放视频并检查原意、画面、字幕、原创观点及 AI 标识。P4 运行证据见 [P4 审核文本](P4-REVIEW.txt)。
 
 ## 每日选题与素材研究
 
@@ -130,7 +148,7 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 - 任务目录名须唯一。默认查看近 72 小时，近 7 天用 `--hours 168`。发布日仅有日期时保留日期精度。日期未知的条目可以留作线索，社区提交时间只代表社区记录。
 - 可用 `--manual <链接清单.json>` 补充用户或 Codex 提供的公开链接和短摘要，纯手工研究加 `--offline`。正文是否读到、发生超时及未接通入口会分别记录。首次试点的公开来源与权限见 [信息源注册表](config/research-sources.json)。
 - AIHOT 将作为未来优先的热点聚合入口，当前为 `pending` 且禁用采集及聚合数据导入。授权后按新版 REST 文档确认精选约 20 条、热点榜前十和个别事件详情的访问条件。 [API 文档](https://aihot.news/agent?tab=api) · [条款](https://aihot.news/terms)
-- 历史记录写入 `workspace/research-history.jsonl`。真实进度发生后用 `history <topic_id> <状态> --note <依据>` 更新。已登记 P8 发布记录的选题由 P8 首次实际发布确认联动更新。可选 `gemini-prompt <任务名>` 在本地生成提示词，用户可以手动提交，反馈仍须核查原始来源。
+- 历史记录写入 `workspace/research-history.jsonl`。实际选中、产出和淘汰可用 `history <topic_id> <状态> --note <依据>` 更新。`published` 只随 P8 首次实际发布确认更新。可选 `gemini-prompt <任务名>` 在本地生成提示词，用户可以手动提交，反馈仍须核查原始来源。
 
 | 文件 | 内容 |
 | --- | --- |
@@ -186,7 +204,7 @@ $python = '.\.venv\Scripts\python.exe'
 
 ### 发布记录
 
-- `register` 读取 P7 清单，按其中已有的平台和形式分别创建 `pending` 记录。可用 `--platform douyin|xiaohongshu` 和 `--format video|note` 筛选。记录含 A/B 线、人工指定的内容分类、选题或片段 ID、清单路径和哈希、对应成品及视频时长。相同清单、平台和形式重试会返回同一记录。
+- `register` 读取 P7 清单，按其中已有的平台和形式分别创建 `pending` 记录。批量登记时工时与成本留空。指定单条平台和形式后，可用 `--manual-minutes` 和 `--production-cost-cny` 录入已分摊的值。记录含 A/B 线、内容分类、选题或片段 ID、清单路径和哈希、对应成品及视频时长。相同清单、平台和形式重试会返回同一记录。
 - `confirm` 接受实际标题、带偏移的发布时间及 `--work-id` 或 `--url`。例如时间格式 `2026-11-26T15:30:00+08:00`。用 `--manual-minutes` 和 `--production-cost-cny` 添加工时和制作成本，只填写分配给该条发布记录的部分。还可用原确认参数重试以补齐工时、成本或作品链接。
 - 已有 P5 选题的发布明细保存在该选题的 `publications` 数组中，首次实际发布确认与 `produced → published` 一起写入原选题历史。各平台和形式可处于不同状态。无 P5 选题的 A 线按片段关联，存入 `workspace/p8-operations/publications.jsonl`。旧的 P5 `published` 状态本身没有平台明细，需登记并确认实际作品才可导入运营快照。
 

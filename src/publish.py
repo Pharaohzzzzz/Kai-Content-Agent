@@ -16,6 +16,7 @@ from media import probe, run_media_tool
 from render import new_output, sha256
 from render_brand import DEFAULT_BRAND, WIDTH, ffmpeg_still, load_brand
 from render_subtitles import write_events
+from research import ready_topic
 
 CONFIG = PROJECT / "config" / "platforms.json"
 OUTPUT = PROJECT / "output"
@@ -30,13 +31,14 @@ def file_record(path, base, expected=None):
     return {"path": relative.as_posix(), "sha256": digest}
 
 
-def inspect_source(source):
+def inspect_source(source, simulate=False):
     require(OUTPUT in source.parents, "Choose an existing deliverable under output/.")
     manifest_path = source / "render_manifest.json"
     raw = manifest_path.read_bytes()
     render = json.loads(raw.decode("utf-8-sig"))
     origin = {"path": manifest_path.relative_to(PROJECT).as_posix(), "sha256": hashlib.sha256(raw).hexdigest()}
     blocks = []
+    synthetic = False
     upstream_risks = render.get("content_risks", [])
     checks = list(render.get("verification_needed", []))
 
@@ -79,6 +81,8 @@ def inspect_source(source):
                     "title": required_text(plan["title_zh"], "title_zh")}
         evidence_record = None
         original = render["source"]
+        synthetic = original.get("synthetic_test", False) or "synthetic test" in original["provenance"].lower()
+        identity["source_media"] = original["path"]
         rights = [{"description": "访谈源素材", "rights": original.get("rights_status"),
                    "origin": original.get("provenance"), "sha256": original.get("sha256")}]
         sources = [{"title": "访谈源素材", "use": required_text(original["provenance"], "source provenance")}]
@@ -95,6 +99,9 @@ def inspect_source(source):
     else:
         raise ValueError("Expected a Kai A- or B-line render_manifest.json.")
 
+    require(not simulate or synthetic, "Simulated packaging requires an A-line synthetic test render.")
+    if synthetic and not simulate:
+        blocks.append("A 线合成测试仅可打包到隔离的模拟目录。")
     if ai is None:
         blocks.append("AI 内容标识需求待核实。")
     if human not in ("pending", "approved"):
@@ -105,7 +112,7 @@ def inspect_source(source):
         "media": media, "content_sources": sources, "material_rights": rights,
         "ai_disclosure": {"required": ai, "note": ai_note},
         "upstream_content_risks": upstream_risks, "upstream_review_items": checks,
-        "blockers": blocks, "expected_hashes": hashes,
+        "blockers": blocks, "expected_hashes": hashes, "synthetic_test": synthetic,
     }
 
 
@@ -190,13 +197,23 @@ def card_files(entries, dest, parent, config, ai):
     return records
 
 
-def pack(source_dir, source, editorial_path, output):
+def pack(source_dir, source, editorial_path, output, simulate=False):
     start = perf_counter()
     config = read_json(CONFIG)
     editorial = read_json(editorial_path)
     editorial_record = file_record(editorial_path, PROJECT)
     require(editorial["source_manifest_sha256"] == source["render"]["sha256"],
             "Editorial brief must match this render manifest SHA-256.")
+    if source["lane"] == "A" and editorial.get("topic_id"):
+        topic, _ = ready_topic(editorial["topic_id"])
+        require(not simulate and topic["line"] == "A", "The publication topic must be a real A-line topic.")
+        interview = topic["production"]["interview"]
+        require((PROJECT / interview["local_path"]).resolve() == Path(source["source_media"]).resolve()
+                and interview["rights"] == source["material_rights"][0]["rights"]
+                and interview["ai_label"] == {True: "required", False: "not-required"}.get(source["ai_disclosure"]["required"]),
+                "A-line publication topic differs from the rendered source, rights or AI disclosure.")
+        require(source["topic_id"] in (None, topic["topic_id"]), "Rendered topic ID differs from the editorial topic.")
+        source["topic_id"] = topic["topic_id"]
     fact = editorial["fact_review"]
     require(fact["status"] in {"checked", "pending", "major_risk"}, "Choose a supported fact review status.")
     required_text(fact["note"], "fact review note")
@@ -206,6 +223,7 @@ def pack(source_dir, source, editorial_path, output):
     hashes = source.pop("expected_hashes")
     manifest = {
         "schema_version": 1, "status": "blocked" if blockers else PENDING,
+        "data_mode": "simulated" if simulate else "real",
         "source": source, "editorial": editorial_record, "fact_review": fact,
         "platform_config": file_record(CONFIG, PROJECT),
         "platform_parameter_basis": config["parameter_basis"],
@@ -254,7 +272,11 @@ def pack(source_dir, source, editorial_path, output):
                     declared = editorial.get("cards_ai_generated")
                     require(type(declared) is bool, "Declare whether publication cards contain AI-generated material.")
                     cards_ai_required = source["ai_disclosure"]["required"] or declared
-                write_copy(dest / "publish-copy.md", name, editorial["platforms"][name], source, cards_ai_required)
+                copy = editorial["platforms"][name]
+                if simulate:
+                    copy = {**copy, "title": "【合成测试】" + copy["title"],
+                            "body": "仅供接口验收，禁止发布。\n\n" + copy["body"]}
+                write_copy(dest / "publish-copy.md", name, copy, source, cards_ai_required)
                 files = {"video": file_record(dest / "video.mp4", stage, source["video.mp4"]["sha256"]),
                          "cover": file_record(dest / "cover.png", stage),
                          "copy": file_record(dest / "publish-copy.md", stage)}
@@ -280,19 +302,27 @@ def main():
     parser.add_argument("--inspect", action="store_true", help="Read the existing manifest and plan without producing files")
     parser.add_argument("--editorial", type=Path, help="Local editorial brief JSON")
     parser.add_argument("--output", type=Path, help="New direct child of project output/")
+    parser.add_argument("--simulate", action="store_true", help="Package synthetic A-line media in the P8 simulation workspace")
     args = parser.parse_args()
     try:
         source = args.source.resolve()
         if args.inspect:
             require(args.editorial is None and args.output is None, "--inspect uses only the source directory.")
-            print(json_text(inspect_source(source), indent=2))
+            print(json_text(inspect_source(source, args.simulate), indent=2))
             return 0
         require(args.editorial is not None and args.output is not None, "Provide --editorial and --output.")
-        output = new_output(args.output)
-        require(output.parent == OUTPUT, "Choose a new direct child of output/.")
+        if args.simulate:
+            output = args.output.resolve()
+            base = PROJECT / "workspace/p8-simulation"
+            require(not args.output.is_symlink() and not output.exists() and output.parent == base,
+                    f"Choose a new simulation package directly under {base}.")
+            base.mkdir(parents=True, exist_ok=True)
+        else:
+            output = new_output(args.output)
+            require(output.parent == OUTPUT, "Choose a new direct child of output/.")
         editorial = args.editorial.resolve()
         require(PROJECT in editorial.parents, "Keep the editorial brief inside the project.")
-        return pack(source, inspect_source(source), editorial, output)
+        return pack(source, inspect_source(source, args.simulate), editorial, output, args.simulate)
     except (KeyError, TypeError, ValueError, OSError, RuntimeError) as error:
         print(f"Publish preparation failed: {error}", file=sys.stderr)
         return 1

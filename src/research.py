@@ -68,6 +68,19 @@ def task_path(run_id):
     return WORKSPACE / run_id
 
 
+def ready_topic(topic_id):
+    run_id, separator, _ = topic_id.partition(":")
+    if not separator:
+        raise ValueError("Use the full research topic ID: task:slug")
+    path = task_path(run_id) / "topics.json"
+    topic = next((item for item in read_json(path)["topics"] if item["topic_id"] == topic_id), None)
+    row = next((item for item in read_history() if item["topic_id"] == topic_id), None)
+    if (not topic or not row or row["status"] == "rejected" or topic["production_state"] != READY
+            or not topic["handoff"]["ready_to_prepare"]):
+        raise ValueError(f"Topic is missing, rejected or not ready for production: {topic_id}")
+    return topic, path
+
+
 def collect(args):
     task = task_path(args.task)
     if task.exists():
@@ -196,6 +209,8 @@ def history_status(args):
         return
     if not args.status or not args.note or not args.note.strip():
         raise ValueError("Updating history requires a status and a note recording the actual progress")
+    if args.status == "published":
+        raise ValueError("Confirm the actual platform publication with src/review.py confirm")
     with history_lock():
         history = read_history()
         row = next((row for row in history if row["topic_id"] == args.topic_id), None)
@@ -205,8 +220,6 @@ def history_status(args):
             raise ValueError("Finalize the research task before updating a topic status")
         if args.status not in TOPIC_STATES[row["status"]]:
             raise ValueError(f"Invalid status transition: {row['status']} to {args.status}")
-        if args.status == "published" and row.get("publications"):
-            raise ValueError("Confirm the actual platform publication with src/review.py confirm")
         row.update(status=args.status, status_note=args.note.strip(),
                    status_at=datetime.now(SHANGHAI).isoformat(timespec="seconds"))
         write_history(history)
