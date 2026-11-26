@@ -8,7 +8,9 @@
 
 **P3 — PASS WITH LIMITATIONS**
 
-**P4 — AWAITING_GPT_REVIEW**
+**P4 — PASS WITH LIMITATIONS**
+
+**P5 — AWAITING_GPT_REVIEW**
 
 GPT 已验收 P0 基线 `5a59e6d27486587e5eee7dfe5493b08658828579`。项目位于 Windows 真实桌面 `D:\Desktop\Kai-Content-Agent`，原始环境检查与初始化证据保留在 P0 提交。
 
@@ -75,3 +77,31 @@ P3 通过实际 Whisper 转写补齐 P2-L01。GPT 已独立核验上传 MP4 的�
 - 8 个字幕段的边界和完整双语文本均核对通过。第 1、5 段英文保留三行，段内未做推测分页。长解读在默认无配音时显示待完善草稿。显式长文技术预览和 2.4 秒模拟配音接入均已验证。
 - 合成横屏、竖屏画面验证了边缘、等比以及长标题。源关键帧封面、中央 3:4 裁切、显式封面时点及配置改色已验证。已安装 Codex 0.171.0 的 `skills/list` 发现 `kai-design` 与 `kai-render`。
 - 交付目录为 `output/p4-review/`，检查证据见 `P4-REVIEW.txt`。当前成品来自合成素材，人工审核待确认。真实人物、中文访谈、客户端遮挡及导入至渲染的完整媒体身份关联仍待验证或补齐。
+
+## P4 审核结论
+
+GPT 已验收 P4 基线 `d4ffe60d3699b80e5ddd29ecc02ecedf97e4d8c4`，结论为 PASS WITH LIMITATIONS，授权进入 P5。
+
+- P4-L01　封面视觉冲击力需要真实素材进一步验证。
+- P4-L02　字幕字体适配采用启发式估算。
+- P4-L03　短结论仍存在约 5 秒静音，P6 完善配音。
+- P4-L04　真实人物、中文访谈及客户端遮挡尚未实测。
+- P4-L05　原始媒体从导入到渲染的完整身份关联仍待补齐。
+
+## P5 实际结果
+
+- 2026-11-26 北京时间，执行近 72 小时真实研究。八个自动入口曾在本机预检成功，本次七个成功，Google 官方 AI RSS 在运行时 TLS 握手超时。其他成功来源为 OpenAI、Microsoft Research、NVIDIA Blog、TechCrunch AI、GitHub Blog、Lex Fridman Podcast（RSS）及 Hacker News（官方公开 API）。Google DeepMind、Hugging Face 的候选 RSS 超时，36氪候选入口无法解析为订阅 XML。
+- Codex 补读四条一手网页或文档，包括 Google DeepMind 公告和论文、Anthropic 研究、Claude Ship 公告。保留 45 条窗口内元数据并形成三条 B 线候选。首选「AI 答对一次就敢用？把同一道任务换四种问法」，95.30 分，65 秒原创表格和口播。第 2、3 名分别为 91.85 分、87.45 分。三条必要素材均可自制，选题历史状态均为 `candidate`。
+- 通过实际任务的结构、评分、报告、历史一致性校验。另用真实公开链接检查 URL、标题归并和历史重复识别。核对公开访谈的权利为 `unknown` 时，A 线交接为 `ready_to_prepare=false`。本机 Codex CLI 0.171.0 的 `skills/list` 已发现且启用 `kai-research`。
+- Python 采集计时 16.401 秒，生成报告和入库 0.014 秒。真实候选、研究草稿和可读报告在 `workspace/p5-2026-11-26/`，源码与验收证据见 `P5-REVIEW.txt`。Gemini 为可选人工复核，本次研究独立完成。
+
+### AIHOT 架构决定
+
+AIHOT 登记为获得授权后优先使用的热点聚合入口，当前 `authorization_status=pending`、`enabled=false`。已读官方接入页、OpenAPI 和条款。本次研究使用独立来源，AIHOT 聚合数据的采集和导入均禁用。
+
+取得书面授权后，仅采用新版 `/api/v1` REST，优先 `items?mode=selected&limit=20`、`hot-topics` 前十，按需取 `stories/{publicId}`，日报使用 `dailies/latest`。届时遵循官方缓存、ETag 和限流规则，收到限流响应时遵从 `Retry-After`。保留原始链接、发布时间和权利信息。热度仅辅助发现，事实回溯第一手来源，视频观点和脚本原创。 [接口文档](https://aihot.news/agent?tab=api) · [OpenAPI](https://aihot.news/openapi-v1.json) · [条款](https://aihot.news/terms)
+
+### P5 已知限制
+
+- 自动采集首批以英文来源为主。当天窗口内部分来源没有新条目，个别入口的网络连接不稳定。公开网页补充依赖 Codex 或人工实际读取。
+- 相似主题采用轻量规则，跨语改写或同一事件的不同角度仍需编辑判断。Python 校验来源对应和准入，事实核查及素材权利确认由 Codex 和用户完成。本期未制作视频。

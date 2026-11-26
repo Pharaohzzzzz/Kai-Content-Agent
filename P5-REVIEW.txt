@@ -1,0 +1,1155 @@
+Kai Content Agent — P5 GPT 审核材料
+P5 状态 AWAITING_GPT_REVIEW
+P4 已审核基线 d4ffe60d3699b80e5ddd29ecc02ecedf97e4d8c4，PASS WITH LIMITATIONS
+
+执行结果
+- Python 标准库采集 RSS、Atom 和 Hacker News 官方 API 元数据。支持 Codex 或用户导入公开链接与短摘要及离线导入。窗口筛选使用实际发布时间，未知日期保留为空。保留同条目的来源信号、社区分数和来源错误。
+- Codex 用已确认事实、当事方声明、媒体报道、未证实信息和 Kai 分析分层核查。Python 校验事实与来源的对应、计算七维分、进行 URL、标题及历史主题去重，生成 JSONL 历史、中文报告和 A/B 研究交接。A 线需要权利确认和现有本地文件，B 线需要合法的必要素材。Gemini 提示词由本地按需生成。
+- AIHOT 的公开接入页、OpenAPI 和条款已读。注册为未来优先的热点聚合来源，authorization_status=pending、enabled=false。只规划 /api/v1，保持精选约 20 条、热点 Top 10，按需读取事件详情或日报。当前无 AIHOT 数据 API 请求，采集与导入均禁用。
+- 代码仅覆盖 P5，阶段状态和 P4 正式限制见 STATUS.md。
+
+实采记录
+- 北京时间 2026-11-23 09:12:48 至 2026-11-26 09:12:48。八个自动来源在预检实际返回可解析数据，正式运行中七个成功。OpenAI RSS 1430 条、Microsoft Research RSS 10 条、NVIDIA Blog RSS 18 条、TechCrunch AI RSS 20 条、GitHub Blog RSS 10 条、Lex Fridman Podcast RSS 505 条、Hacker News 官方 API 热榜 10 条。以上是窗口筛选前订阅元数据数。
+- Google 官方 AI RSS 正式运行时 TLS 握手超时。Google DeepMind RSS 预检 TLS 握手超时，Hugging Face Blog RSS 预检请求超时，36氪预检返回内容无法解析为 RSS。AIHOT 处于授权门禁。
+- Codex 补读四条一手公开资料并导入短摘要。窗口过滤后 45 条元数据，无实际重复项。补读来源及出版信息见下附真实报告。
+- 本机联网采集耗时 16.401 秒。保存候选、报告和历史耗时 0.014 秒。这两项不含 Codex 研究时间。运行日志北京时间 09:17:15 的快照记录累计 3,324,315 Tokens，其中输入 3,291,777（缓存输入 3,168,896），输出 32,538（含推理 5,569）。此为截至该时刻的会话运行统计，包含缓存上下文计数。
+
+真实研究命令
+  .\.venv\Scripts\python.exe -X utf8 src/research.py collect p5-2026-11-26 --manual 'tmp/p5-public-links.json'
+  .\.venv\Scripts\python.exe -X utf8 src/research.py finalize p5-2026-11-26
+  .\.venv\Scripts\python.exe -X utf8 src/research.py validate p5-2026-11-26
+  实跑导入清单现存 workspace/p5-2026-11-26/manual-links.json。复跑请选择新任务名并引用此归档清单。
+
+最小验证
+- 实际候选与 JSONL 历史、报告一致，三条均为 candidate。三个加权分依次为 95.30、91.85、87.45。另用本次已采集链接验证 URL、标题及别名重复归并，并检查历史命中和有实质进展时的记录字段。
+- 使用真实公开访谈地址，仅验证 rights=unknown 且无合法本地素材时，A 线为 needs_material，ready_to_prepare=false。试图填写已具备合法本地素材仍被拒绝。无媒体下载。
+- Atom 只有 updated 日期时不将其当作发布时间，AIHOT 禁用配置不触发取数。
+- Codex CLI 0.171.0 的本地 app-server skills/list 确认 kai-research 路径正确且已启用。
+- 运营决定为首选 65 秒原创表格和口播。候选均能用自制图表或文字开始准备。本期没有符合标准且已获授权的 A 线候选，未实测视频效果。
+- 发现层首批以英文源为主。来源可能暂时不可用。轻量去重仍需编辑判断跨语改写。Python 校验记录结构，重要事实与权利仍由 Codex 和用户基于来源核实。
+
+工作产物
+  workspace/p5-2026-11-26/sources.json
+  workspace/p5-2026-11-26/topics.json
+  workspace/p5-2026-11-26/daily-brief.md
+  workspace/research-history.jsonl
+  README.md 和 STATUS.md 已更新。
+
+以下为实际日报和 P5 新增的完整核心源码、配置、Skill。历史阶段源码未重复附录。
+
+===== workspace/p5-2026-11-26/daily-brief.md =====
+# Kai 每日选题｜2026-11-26
+
+研究范围 72 小时（北京时间）。共入选 3 个候选。
+
+本次采集受限：Google 官方 AI 博客。
+
+**优先制作：AI 答对一次就敢用？把同一道任务换四种问法**。把一项公开研究变成观众今天就能使用的四问验收法，内容依赖原创表格，制作成本低。
+
+三项均有第一手依据及可独立制作的原创画面。本次没有达到同等标准并具备已确认素材的 A 线选题。
+
+## 1. AI 答对一次就敢用？把同一道任务换四种问法
+
+**95.30 分 · B 线 · 可准备制作** · 原创表格演示＋口播 · 65 秒
+编号 `p5-2026-11-26:ai-reliability-repeat-test`
+
+- 已确认事实｜Google DeepMind 于 11 月 24 日发布 Humanity’s First Exam，包含 544 条文本或图文提示，组成 136 个四题组。研究关注模型能否稳定答对相近任务。 [Google DeepMind 2026-11-24](<https://blog.google/innovation-and-ai/models-and-research/google-deepmind/humanitys-first-exam/>) · [Google DeepMind 2026-11-24](<https://storage.googleapis.com/deepmind-media/papers/hfe_tech_paper.pdf>)
+- 当事方声明｜论文报告的前五名模型在每组 16 次回答里，「至少答对一次」的估计概率均为 100%，「16 次全部答对」的估计概率平均为 85.8%。两者均是该基准结果。 [Google DeepMind 2026-11-24](<https://storage.googleapis.com/deepmind-media/papers/hfe_tech_paper.pdf>)
+- Kai原创判断｜把同一条业务验收规则写成多种问法，并统计整组通过，比展示一次成功更接近日常交付需要。
+
+- **受众价值**　常用 AI 做表格核对、整理报价和起草邮件的人，可以用一张打勾表判断哪些步骤还需要人工复核。
+- **Kai 观点**　以「整组通过」作为是否交给 AI 独立处理的门槛。关键字段出现一次不一致，就保留人工复核。
+- **开场**　同一张报价单，AI 第一次把税算对了。你换种问法，它还会算对吗？
+- **推荐理由**　把一项公开研究变成观众今天就能使用的四问验收法，内容依赖原创表格，制作成本低。
+- **脚本**　先用虚构报价单提出同一核验任务，展示四种等价指令和人工标准答案。制作时固定模型版本、条件与新会话，逐项记录结果；未实测前只展示验收规则。用 100% 与 85.8% 解释论文中两个指标的不同，收在整组通过。
+- **素材**　Kai 自制报价单、四问和验收表（必要，owned / planned）；原创口播与指标示意图（必要，owned / planned）；若录制，使用独立账号、虚构数据与经过脱敏的自有操作画面（可选，pending / missing）
+- **制作**　低，准备一张可人工核算的虚构中文报价表和四条等价提示。demo 样本小，画面须标明仅演示验收方法。论文统计与 Kai 示范分开呈现。
+- **待核实**　录制时保存模型版本、四种问法和真实输出。若不录实测，只展示原创示意表。
+
+## 2. AI 省下的时间，后来是谁补回去的？
+
+**91.85 分 · B 线 · 可准备制作** · 流程图拆解＋口播 · 60 秒
+编号 `p5-2026-11-26:measure-ai-handoff-work`
+
+- 已确认事实｜Anthropic 于 11 月 23 日发布《Working with AI》，基于对其 58 家企业客户的 66 次访谈。 [Anthropic Research 2026-11-23](<https://www.anthropic.com/research/working-with-ai>)
+- 当事方声明｜报告记述一家律所的冲突检索流程。新流程将更多待判断的潜在冲突交给负责检索的员工，引发抵触，随后撤回并恢复原流程。 [Anthropic Research 2026-11-23](<https://www.anthropic.com/research/working-with-ai>)
+- Kai原创判断｜自动化前后同时记录生成、复核、返工、交接四类人工时间，就能看出节省的时间是否转移到了下一岗。
+
+- **受众价值**　小团队老板、运营及独立开发者试点 AI 时，可以从已有流程挑一项，用同一张表比较总工时。
+- **Kai 观点**　判断值不值得继续投，按每个合格交付件所需的总人工时间核算，再比较漏检和返工率。
+- **开场**　提需求的人少花五分钟，审核的人多花十分钟，你的团队到底省了多少时间？
+- **推荐理由**　把一手访谈案例转成可执行的团队验收指标，有经营价值，也适用于个人工作流。
+- **脚本**　用一张自制图还原案例中的任务流转。再用虚构的中文客服工单说明如何比较每个合格交付件的生成、复核、返工和交接总时间。
+- **素材**　自绘前后流程图与虚构工时账（必要，owned / planned）；原创客服案例和口播（必要，owned / planned）
+- **制作**　低，绘制旧流程、新流程和总工时记账表。客户访谈为定性证据，案例和虚构工时要分别标明，不将结论外推到所有企业。
+
+## 3. AI 能批自己的代码了？小团队先画三条审批线
+
+**87.45 分 · B 线 · 可准备制作** · 原创审批规则卡＋口播 · 55 秒
+编号 `p5-2026-11-26:claude-ship-approval-boundary`
+
+- 已确认事实｜Anthropic 于 11 月 23 日宣布 Claude Ship，为启用服务的 GitHub 仓库提供 PR 审查、修复及按团队策略作审批判断的流程。 [Anthropic 2026-11-23](<https://claude.com/resources/articles/introducing-claude-ship>)
+- 当事方声明｜公告称 PR Steward 与 Claude Approvals 处于 beta，Code Review 已正式可用，Claude Ship 面向 Team 与 Enterprise 计划。官方建议先使用观察模式。 [Anthropic 2026-11-23](<https://claude.com/resources/articles/introducing-claude-ship>)
+- Kai原创判断｜把审批线分成可自动审批、需要指定人确认、暂不开放三档，并先观察实际误批和漏审再调整。
+
+- **受众价值**　带着 AI 写代码的独立开发者和小团队，可以直接拿三档权限表讨论哪些变更由人批准。
+- **Kai 观点**　把「AI 能不能批」改成事先约定什么风险可接受。以文案改动、影响业务逻辑、涉及付款或权限为三档示例。
+- **开场**　如果你离开电脑半小时，哪些改动你愿意让 AI 批过去？
+- **推荐理由**　适合创业及独立开发子受众，提供一条例子明确的审批规则。可以用原创建议完成，不依赖付费试用或真实仓库。
+- **脚本**　快速解释 PR 是提交修改、等审核的一道关卡。用文案、业务逻辑、付款或权限三例演示分档，最后用观察模式说明先记录判断再决定哪些环节可以授权。
+- **素材**　Kai 自制三级审批规则图（必要，owned / planned）；三个虚构改动案例与原创口播（必要，owned / planned）
+- **制作**　低，绘制三级审批卡和三个虚构 PR 示例。避免把团队策略允许的审批误写成完全自动发布。明确套餐、beta 和演示性质。
+- **待核实**　若视频计划展示具体操作界面，另行核实可用套餐、界面状态以及录屏使用条件。现方案仅使用原创图卡。
+
+评分用于本次选题比较。制作建议以事实与素材准入结果为准。
+
+===== src/research.py =====
+"""Kai Content Agent P5 command line, using the Python standard library."""
+import argparse
+import json
+import os
+import re
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
+from datetime import datetime, timedelta
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from time import perf_counter
+
+from research_collect import SHANGHAI, collect_source, discovery, manual_rows, read_json
+from research_topics import READY, TOPIC_STATES, WEIGHTS, daily_brief, gemini_prompt, prepare_topic, rank_topics
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WORKSPACE = ROOT / "workspace"
+HISTORY = WORKSPACE / "research-history.jsonl"
+
+
+def json_text(value):
+    return json.dumps(value, ensure_ascii=False, indent=2) + "\n"
+
+
+def atomic_write(path, contents):
+    pending = None
+    try:
+        with NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n", dir=path.parent, delete=False) as output:
+            pending = Path(output.name)
+            output.write(contents)
+        pending.replace(path)
+    finally:
+        if pending is not None:
+            pending.unlink(missing_ok=True)
+
+
+@contextmanager
+def history_lock():
+    WORKSPACE.mkdir(exist_ok=True)
+    with HISTORY.with_suffix(".lock").open("a+b") as handle:
+        if os.name == "nt":
+            import msvcrt
+            handle.seek(0)
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # Closing the handle releases the lock, including after an interrupted process.
+        yield
+
+
+def read_history():
+    if not HISTORY.exists():
+        return []
+    with HISTORY.open(encoding="utf-8") as source:
+        return [json.loads(line) for line in source if line.strip()]
+
+
+def write_history(history):
+    atomic_write(HISTORY, "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in history))
+
+
+def task_path(run_id):
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", run_id):
+        raise ValueError("Task name must use lowercase ASCII letters, digits and hyphens")
+    return WORKSPACE / run_id
+
+
+def collect(args):
+    task = task_path(args.task)
+    if task.exists():
+        raise ValueError(f"Task already exists: {task}")
+    if args.hours < 1:
+        raise ValueError("--hours must be positive")
+    if args.offline and not args.manual:
+        raise ValueError("--offline requires --manual")
+    started = perf_counter()
+    end = datetime.now(SHANGHAI)
+    start = end - timedelta(hours=args.hours)
+    manual = manual_rows(args.manual) if args.manual else []
+    registered = read_json(ROOT / "config/research-sources.json")
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        results = list(executor.map(lambda source: collect_source(source, args.offline), registered))
+    statuses, rows = [], list(manual)
+    for status, found in results:
+        statuses.append(status)
+        rows.extend(found)
+    for source_id in sorted({item["source_id"] for item in manual}):
+        imported = [item for item in manual if item["source_id"] == source_id]
+        statuses.append(dict(
+            source_id=source_id, name=imported[0]["source"], method="manual", status="imported",
+            count=len(imported), urls=list(dict.fromkeys(item["url"] for item in imported)),
+            collected_at=imported[0]["collected_at"],
+            access=list(dict.fromkeys(item["access"] for item in imported)), errors=[],
+        ))
+    items, duplicates, filtered = discovery(rows, start, end)
+    result = dict(
+        schema_version=1, task=args.task, research_date=end.date().isoformat(), timezone=SHANGHAI.tzname(None),
+        hours=args.hours, window_start=start.isoformat(timespec="seconds"), window_end=end.isoformat(timespec="seconds"),
+        offline=args.offline, sources=statuses, items=items, duplicates=duplicates, filtered_outside_window=filtered,
+        collection_seconds=round(perf_counter() - started, 3),
+    )
+    task.mkdir(parents=True)
+    atomic_write(task / "sources.json", json_text(result))
+    print(f"{task / 'sources.json'} | items={len(items)} duplicates={len(duplicates)} seconds={result['collection_seconds']:.3f}")
+    for status in statuses:
+        print(f"{status['source_id']}: {status['status']} ({status['count']})")
+        for error in status["errors"]:
+            print(f"  {error}")
+
+
+def draft_topics(task, collected):
+    draft = read_json(task / "research-draft.json")
+    if not isinstance(draft["topics"], list):
+        raise ValueError("Draft topics must be an array")
+    note = draft["note"]
+    if not isinstance(note, str) or not draft["topics"] and not note.strip():
+        raise ValueError("An empty draft requires an editorial note")
+    topics = [prepare_topic(ROOT, task.name, row, collected["research_date"]) for row in draft["topics"]]
+    if len({row["topic_id"] for row in topics}) != len(topics):
+        raise ValueError("Draft topic slugs must be unique")
+    return topics, note.strip()
+
+
+def history_row(topic, task):
+    return {key: topic[key] for key in ("topic_id", "created_date", "title", "theme", "event_url", "line", "status")} | {
+        "source_urls": topic["handoff"]["source_urls"], "task": task, "new_development": topic["new_development"],
+    }
+
+
+def finalize(args):
+    started = perf_counter()
+    task = task_path(args.task)
+    collected = read_json(task / "sources.json")
+    topics, note = draft_topics(task, collected)
+    max_topics = read_json(ROOT / "config/kai-content.json")["max_candidates"]
+    with history_lock():
+        if (task / "topics.json").exists():
+            raise ValueError("Task has already been finalized")
+        history = read_history()
+        # A run interrupted after saving history can safely publish the same task on retry.
+        prior = [row for row in history if row["task"] != task.name]
+        kept, duplicates = rank_topics(topics, prior, max_topics)
+        recommendation = next((row["topic_id"] for row in kept if row["production_state"] == READY), None)
+        if not recommendation and not note:
+            note = "候选存在事实或素材缺口，或已在历史记录中出现。"
+        result = dict(
+            schema_version=1, task=task.name, research_date=collected["research_date"], note=note,
+            scoring_weights_percent=WEIGHTS, recommended_topic_id=recommendation, topics=kept, duplicates=duplicates,
+        )
+        atomic_write(task / "daily-brief.md", daily_brief(result, collected))
+        write_history(prior + [history_row(row, task.name) for row in kept])
+        result["finalization_seconds"] = round(perf_counter() - started, 3)
+        atomic_write(task / "topics.json", json_text(result))
+    print(f"{task / 'topics.json'} | candidates={len(kept)} recommended={recommendation or 'none'} "
+          f"seconds={result['finalization_seconds']:.3f}")
+
+
+def validate(args):
+    task = task_path(args.task)
+    collected = read_json(task / "sources.json")
+    result = read_json(task / "topics.json")
+    topics, _ = draft_topics(task, collected)
+    expected = {row["topic_id"]: row for row in topics}
+    saved = result["topics"]
+    for rank, topic in enumerate(saved, start=1):
+        if topic["rank"] != rank or any(topic[key] != value for key, value in expected[topic["topic_id"]].items()):
+            raise ValueError(f"Topic doesn't match the validated draft: {topic['topic_id']}")
+    if saved != sorted(saved, key=lambda row: (-row["score"], row["slug"])):
+        raise ValueError("Invalid topic ranking")
+    recommendation = next((row["topic_id"] for row in saved if row["production_state"] == READY), None)
+    if result["scoring_weights_percent"] != WEIGHTS or result["recommended_topic_id"] != recommendation:
+        raise ValueError("Invalid scoring weights or recommended topic")
+    if (task / "daily-brief.md").read_text(encoding="utf-8") != daily_brief(result, collected):
+        raise ValueError("Brief does not match topics.json")
+    with history_lock():
+        recorded = {row["topic_id"]: row for row in read_history() if row["task"] == task.name}
+    if recorded.keys() != {topic["topic_id"] for topic in saved}:
+        raise ValueError("History entries do not match finalized topics")
+    for topic in saved:
+        record = recorded[topic["topic_id"]]
+        expected_record = history_row(topic, task.name)
+        if record["status"] not in TOPIC_STATES or any(
+            record[key] != value for key, value in expected_record.items() if key != "status"
+        ):
+            raise ValueError(f"Invalid history entry: {topic['topic_id']}")
+    print(f"VALID | topics={len(saved)} history={len(recorded)} recommendation={recommendation or 'none'}")
+
+
+def history_status(args):
+    if not args.topic_id:
+        for row in read_history():
+            print(json.dumps(row, ensure_ascii=False))
+        return
+    if not args.status or not args.note or not args.note.strip():
+        raise ValueError("Updating history requires a status and a note recording the actual progress")
+    with history_lock():
+        history = read_history()
+        row = next((row for row in history if row["topic_id"] == args.topic_id), None)
+        if row is None:
+            raise ValueError(f"Unknown topic: {args.topic_id}")
+        if not (task_path(row["task"]) / "topics.json").is_file():
+            raise ValueError("Finalize the research task before updating a topic status")
+        if args.status not in TOPIC_STATES[row["status"]]:
+            raise ValueError(f"Invalid status transition: {row['status']} to {args.status}")
+        row.update(status=args.status, status_note=args.note.strip(),
+                   status_at=datetime.now(SHANGHAI).isoformat(timespec="seconds"))
+        write_history(history)
+    print(f"{args.topic_id}: {args.status}")
+
+
+def write_gemini_prompt(args):
+    task = task_path(args.task)
+    path = task / "gemini-prompt.md"
+    result = read_json(task / "topics.json")
+    if not result["topics"]:
+        raise ValueError("No candidates to review")
+    with path.open("x", encoding="utf-8", newline="\n") as output:
+        output.write(gemini_prompt(result))
+    print(path)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    prep = commands.add_parser("collect", help="Start a new research task")
+    prep.add_argument("task")
+    prep.add_argument("--hours", type=int, default=72)
+    prep.add_argument("--manual", type=Path, help="Import public links and short summaries as JSON")
+    prep.add_argument("--offline", action="store_true", help="Only use manually provided links")
+    prep.set_defaults(handler=collect)
+    for name, handler in [("finalize", finalize), ("validate", validate), ("gemini-prompt", write_gemini_prompt)]:
+        cmd = commands.add_parser(name)
+        cmd.add_argument("task")
+        cmd.set_defaults(handler=handler)
+    history = commands.add_parser("history", help="List records, or record a verified status change")
+    history.add_argument("topic_id", nargs="?")
+    history.add_argument("status", nargs="?", choices=TOPIC_STATES)
+    history.add_argument("--note")
+    history.set_defaults(handler=history_status)
+    args = parser.parse_args()
+    try:
+        args.handler(args)
+    except (OSError, ValueError, KeyError, AttributeError, TypeError) as error:
+        print(f"Research error: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+===== src/research_collect.py =====
+"""Collect public discovery metadata without requesting article bodies."""
+import json
+import re
+import unicodedata
+import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
+from datetime import date, datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
+from html.parser import HTMLParser
+from time import perf_counter
+from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.request import Request, urlopen
+
+
+SHANGHAI = timezone(timedelta(hours=8), "Asia/Shanghai")
+HN = "https://hacker-news.firebaseio.com/v0"
+USER_AGENT = "KaiContentAgent/1.0 (public research metadata)"
+TRACKING = {"fbclid", "gclid", "igshid", "mc_cid", "mc_eid"}
+
+
+def read_json(path):
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def required_text(value, label):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{label} must be non-empty text")
+    return value.strip()
+
+
+def checked_url(value):
+    value = required_text(value, "URL")
+    parts = urlsplit(value)
+    if (
+        parts.scheme not in {"http", "https"} or not parts.hostname
+        or parts.username is not None or parts.password is not None
+        or any(char.isspace() or ord(char) < 32 for char in value)
+    ):
+        raise ValueError(f"Expected a public HTTP(S) URL: {value}")
+    return value
+
+
+def url_key(value):
+    url = urlsplit(checked_url(value))
+    query = sorted(
+        (key, val) for key, val in parse_qsl(url.query, keep_blank_values=True)
+        if not (key.lower().startswith("utm_") or key.lower() in TRACKING)
+    )
+    return urlunsplit(("", url.netloc.lower(), url.path.rstrip("/") or "/", urlencode(query), ""))
+
+
+def title_key(value):
+    return "".join(char for char in unicodedata.normalize("NFKC", value).casefold() if char.isalnum())
+
+
+def aihot_link(value):
+    host = urlsplit(value).hostname or ""
+    return any(host == domain or host.endswith("." + domain) for domain in ("aihot.news", "aihot.virxact.com"))
+
+
+def publication(value):
+    if value is None or value == "":
+        return None
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return date.fromisoformat(value).isoformat()
+    try:
+        stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        stamp = parsedate_to_datetime(value)
+    return stamp.isoformat() if stamp.tzinfo is not None else None
+
+
+def within_window(value, start, end):
+    if len(value) == 10:
+        # Publisher gives only a calendar date. Keep overlapping local dates.
+        return start.date() <= date.fromisoformat(value) <= end.date()
+    stamp = datetime.fromisoformat(value)
+    return start <= stamp <= end
+
+
+class TextOnly(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.parts = []
+        self.hidden = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"script", "style"}:
+            self.hidden += 1
+        elif tag in {"p", "div", "br", "li"}:
+            self.parts.append(" ")
+
+    def handle_endtag(self, tag):
+        if tag in {"script", "style"}:
+            self.hidden = max(0, self.hidden - 1)
+
+    def handle_data(self, data):
+        if not self.hidden:
+            self.parts.append(data)
+
+
+def plain_text(value):
+    parser = TextOnly()
+    parser.feed(value or "")
+    return " ".join("".join(parser.parts).split())
+
+
+def brief_text(value):
+    result = plain_text(value)
+    return result if len(result) <= 280 else result[:279].rstrip() + "…"
+
+
+def fetch(url):
+    request = Request(checked_url(url), headers={"User-Agent": USER_AGENT})
+    with urlopen(request, timeout=8) as response:
+        limit = 6 * 1024 * 1024
+        data = response.read(limit + 1)
+        if len(data) > limit:
+            raise ValueError("Public feed exceeded the 6 MiB response limit")
+        return data
+
+
+def rss_entries(url):
+    root = ET.fromstring(fetch(url))
+    entries = root.findall(".//{*}item") or root.findall("{*}entry")
+    if root.tag.rsplit("}", 1)[-1] not in {"rss", "feed", "RDF"}:
+        raise ValueError("Response is not RSS or Atom")
+    for entry in entries:
+        link = None
+        for element in entry.findall("{*}link"):
+            if element.get("rel", "alternate") == "alternate":
+                link = element.get("href") or element.text
+                if link:
+                    break
+        if not link:
+            continue
+        title = plain_text(entry.findtext("{*}title"))
+        if not title:
+            continue
+        raw_date = entry.findtext("{*}pubDate") or entry.findtext("{*}published") or entry.findtext("{*}date")
+        try:
+            published_at = publication(raw_date.strip() if raw_date else None)
+        except (TypeError, ValueError, OverflowError):
+            published_at = None
+        summary = entry.findtext("{*}description") or entry.findtext("{*}summary")
+        try:
+            link = checked_url(urljoin(url, link.strip()))
+        except ValueError:
+            continue
+        yield dict(title=title, url=link, published_at=published_at, summary=brief_text(summary))
+
+
+def hn_entries(url):
+    ids = json.loads(fetch(url))
+    if not isinstance(ids, list) or not all(type(item) is int and item > 0 for item in ids[:10]):
+        raise ValueError("Hacker News API returned an invalid top story list")
+    rows, errors = [], []
+
+    def load_item(item_id):
+        item = json.loads(fetch(f"{HN}/item/{item_id}.json"))
+        if not item or item.get("type") != "story" or item.get("dead") or item.get("deleted"):
+            return None
+        linked_url = checked_url(item["url"]) if item.get("url") else None
+        return dict(
+            title=plain_text(item["title"]), url=f"https://news.ycombinator.com/item?id={item_id}",
+            linked_url=linked_url, published_at=datetime.fromtimestamp(item["time"], timezone.utc).isoformat(),
+            summary="", engagement={"points": item.get("score"), "comments": item.get("descendants")},
+            publication_scope="hn_submission",
+        )
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        tasks = [executor.submit(load_item, item_id) for item_id in ids[:10]]
+        for item_id, task in zip(ids, tasks):
+            try:
+                row = task.result()
+                if row and row["title"]:
+                    rows.append(row)
+            except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError) as error:
+                errors.append(f"item {item_id}: {error}")
+    return rows, errors
+
+
+def collect_source(source, offline):
+    now = datetime.now(SHANGHAI).isoformat(timespec="seconds")
+    status = dict(source, collected_at=now, count=0, errors=[])
+    if source.get("enabled") is False or source.get("authorization_status") == "pending":
+        return dict(status, status="disabled"), []
+    if source["access_status"] == "unavailable":
+        return dict(status, status="unavailable", errors=[source["access_note"]]), []
+    if offline:
+        return dict(status, status="offline"), []
+    started = perf_counter()
+    try:
+        if source["method"] == "rss":
+            rows, errors = list(rss_entries(source["url"])), []
+        elif source["method"] == "hn_api":
+            rows, errors = hn_entries(source["url"])
+        else:
+            raise ValueError(f"Unsupported collection method: {source['method']}")
+        status.update(status="partial" if rows and errors else "failed" if errors else "ok", errors=errors)
+    except (OSError, ValueError, ET.ParseError) as error:
+        rows = []
+        status.update(status="failed", errors=[f"{type(error).__name__}: {error}"])
+    status.update(count=len(rows), seconds=round(perf_counter() - started, 3))
+    rows = [
+        dict(row, source_id=source["source_id"], source=source["name"], category=source["category"],
+             collected_at=now, access="metadata_only", first_hand=source["first_hand"])
+        for row in rows
+    ]
+    return status, rows
+
+
+def manual_rows(path):
+    rows = []
+    inputs = read_json(path)
+    if not isinstance(inputs, list):
+        raise ValueError("Manual input must be a JSON array")
+    for raw in inputs:
+        url = checked_url(raw["url"])
+        source = required_text(raw["source"], "source")
+        if aihot_link(url) or title_key(source) == "aihot" or raw.get("source_id") == "aihot":
+            raise ValueError("AIHOT material is disabled pending written authorization")
+        access = raw.get("access", "link_only")
+        supplied_by = raw.get("supplied_by", "user")
+        if access not in {"opened", "link_only"} or supplied_by not in {"user", "codex"}:
+            raise ValueError("Invalid manual access or supplied_by value")
+        first_hand = raw.get("first_hand", False)
+        if type(first_hand) is not bool:
+            raise ValueError("Manual first_hand must be a boolean")
+        pub = publication(raw.get("published_at"))
+        rows.append(dict(
+            title=required_text(raw["title"], "title"), url=url, published_at=pub,
+            source=source, source_id=f"manual:{source}", category=required_text(raw["category"], "category"),
+            summary=brief_text(raw.get("summary")), collected_at=datetime.now(SHANGHAI).isoformat(timespec="seconds"),
+            first_hand=first_hand, access=access, supplied_by=supplied_by,
+        ))
+    return rows
+
+
+def discovery(rows, start, end):
+    items, by_url, by_title, filtered = {}, {}, {}, 0
+    duplicates = []
+    # Prefer source material to community submissions, and read manual evidence to feed metadata.
+    ordered = sorted(rows, key=lambda row: (not row["first_hand"], row["access"] != "opened"))
+    for index, row in enumerate(ordered):
+        pub = row["published_at"]
+        if pub is not None and not within_window(pub, start, end):
+            filtered += 1
+            continue
+        if aihot_link(row["url"]) or (row.get("linked_url") and aihot_link(row["linked_url"])):
+            continue
+        urls = [url_key(row["url"])]
+        if row.get("linked_url"):
+            urls.append(url_key(row["linked_url"]))
+        title = title_key(row["title"])
+        hits = [by_url[key] for key in urls if key in by_url]
+        if title and title in by_title:
+            hits.append(by_title[title])
+        group = min(hits) if hits else index
+        if not hits:
+            items[group] = dict(row, also_seen=[])
+        else:
+            hit = items[group]
+            hit["also_seen"].append(row)
+            duplicates.append({"kept_url": hit["url"], "duplicate_url": row["url"], "source": row["source"]})
+            if hit["published_at"] is None and pub and "publication_scope" not in row and urls[0] == url_key(hit["url"]):
+                hit["published_at"] = pub
+            for other in set(hits) - {group}:
+                merged = items.pop(other)
+                hit["also_seen"].extend([dict(merged, also_seen=[]), *merged["also_seen"]])
+                duplicates.append({"kept_url": hit["url"], "duplicate_url": merged["url"], "source": merged["source"]})
+                for lookup in (by_url, by_title):
+                    for key, value in lookup.items():
+                        if value == other:
+                            lookup[key] = group
+        for key in urls:
+            by_url[key] = group
+        if title:
+            by_title[title] = group
+    for item in items.values():
+        item["source_count"] = len({item["source"], *(row["source"] for row in item["also_seen"])})
+
+    def discovery_key(item):
+        pub = item["published_at"]
+        moment = datetime.fromisoformat(pub) if pub else None
+        if moment and moment.tzinfo is None:
+            moment = moment.replace(tzinfo=SHANGHAI)
+        points = max((row.get("engagement", {}).get("points") or 0 for row in [item, *item["also_seen"]]))
+        return pub is not None, item["source_count"], points, moment.timestamp() if moment else 0
+
+    ranked = sorted(
+        items.values(), key=discovery_key,
+        reverse=True,
+    )
+    return ranked, duplicates, filtered
+
+===== src/research_topics.py =====
+"""Validate editorial drafts, rank candidates, and render the operating brief."""
+import re
+from difflib import SequenceMatcher
+
+from research_collect import aihot_link, checked_url, publication, required_text, title_key, url_key
+
+
+WEIGHTS = {
+    "information_value": 25, "audience_fit": 25, "timeliness": 15, "originality": 15,
+    "sharing_potential": 10, "business_value": 5, "production_feasibility": 5,
+}
+CLAIM_LABELS = {
+    "confirmed": "已确认事实", "party_statement": "当事方声明", "media_report": "媒体报道",
+    "unverified": "未证实信息", "kai_analysis": "Kai原创判断",
+}
+EVIDENCE_KINDS = {"primary", "media", "community", "other"}
+RIGHTS = {"owned", "authorized", "unknown", "pending", "denied"}
+ALLOW_RIGHTS = {"owned", "authorized"}
+AI_LABELS = {"required", "not-required", "unknown"}
+READY = "ready"
+TOPIC_STATES = {
+    "candidate": {"selected", "rejected"}, "selected": {"produced", "rejected"},
+    "produced": {"published"}, "published": set(), "rejected": set(),
+}
+
+
+def allowed(value, values, label):
+    if not isinstance(value, str) or value not in values:
+        raise ValueError(f"Invalid {label}: {value}")
+    return value
+
+
+def bool_field(value, label):
+    if type(value) is not bool:
+        raise ValueError(f"{label} must be a boolean")
+    return value
+
+
+def topic_url(value):
+    url = checked_url(value)
+    if aihot_link(url):
+        raise ValueError("AIHOT is disabled pending written authorization")
+    return url
+
+
+def nonempty_list(value, label):
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{label} must be a non-empty array")
+    return value
+
+
+def facts_for(raw, event_url):
+    evidence = {}
+    for item in nonempty_list(raw["evidence"], "evidence"):
+        url = topic_url(item["url"])
+        key = url_key(url)
+        if key in evidence:
+            raise ValueError(f"Duplicate evidence URL: {url}")
+        evidence[key] = dict(
+            url=url, title=required_text(item["title"], "evidence title"),
+            source=required_text(item["source"], "evidence source"),
+            kind=allowed(item["kind"], EVIDENCE_KINDS, "evidence kind"),
+            access=allowed(item["access"], {"opened", "link_only"}, "evidence access"),
+            published_at=publication(item.get("published_at")),
+        )
+    if url_key(event_url) not in evidence:
+        raise ValueError("event_url must appear in evidence")
+    claims, gaps = [], []
+    for claim in nonempty_list(raw["claims"], "claims"):
+        role = allowed(claim["role"], CLAIM_LABELS, "claim role")
+        statement = required_text(claim["statement"], "claim statement")
+        core = bool_field(claim["core"], "claim core")
+        claim_urls = claim["urls"]
+        if not isinstance(claim_urls, list):
+            raise ValueError("claim urls must be an array")
+        sources = []
+        for url in claim_urls:
+            source = evidence.get(url_key(topic_url(url)))
+            if not source:
+                raise ValueError(f"Claim URL missing from evidence: {url}")
+            sources.append(source)
+        opened = {source["kind"] for source in sources if source["access"] == "opened"}
+        match = {"confirmed": "primary", "party_statement": "primary", "media_report": "media"}
+        if role in match and match[role] not in opened:
+            raise ValueError(f"{role} claim needs corresponding opened evidence: {statement}")
+        if core and role == "kai_analysis":
+            raise ValueError("Kai analysis cannot be a core fact")
+        if core and role in {"unverified", "media_report"}:
+            gaps.append(statement)
+        claims.append(dict(role=role, core=core, statement=statement, urls=[source["url"] for source in sources]))
+    if not any(claim["core"] for claim in claims):
+        raise ValueError("At least one core factual claim is required")
+    if evidence[url_key(event_url)]["access"] != "opened":
+        gaps.append("原始事件链接尚未读到正文。")
+    return list(evidence.values()), claims, gaps
+
+
+def material_fields(item):
+    return dict(
+        rights=allowed(item["rights"], RIGHTS, "material rights"),
+        rights_note=required_text(item["rights_note"], "material rights_note"),
+        ai_label=allowed(item["ai_label"], AI_LABELS, "material AI label"),
+    )
+
+
+def production_for(root, line, raw):
+    production = dict(
+        format=required_text(raw["format"], "format"),
+        difficulty=required_text(raw["difficulty"], "difficulty"),
+        risk=required_text(raw["risk"], "risk"),
+    )
+    duration = raw["duration_seconds"]
+    if type(duration) is not int or duration < 1:
+        raise ValueError("duration_seconds must be a positive integer")
+    production["duration_seconds"] = duration
+    if line == "A":
+        interview = raw["interview"]
+        local_path = interview.get("local_path")
+        available = bool_field(interview["has_legal_local_material"], "has_legal_local_material")
+        use = material_fields(interview)
+        interview_url = topic_url(interview["interview_url"])
+        media_url = topic_url(interview["media_url"])
+        if local_path:
+            local_path = required_text(local_path, "local_path")
+        if available and (
+            use["rights"] not in ALLOW_RIGHTS or not local_path or not (root / local_path).is_file()
+        ):
+            raise ValueError("A legal local interview requires confirmed rights and an existing file")
+        production["interview"] = dict(
+            interview_url=interview_url, people=required_text(interview["people"], "interview people"),
+            context=required_text(interview["context"], "interview context"), media_url=media_url,
+            planned_segment=required_text(interview["planned_segment"], "planned_segment"),
+            has_legal_local_material=available, local_path=local_path, **use,
+        )
+        ready = available and use["rights"] in ALLOW_RIGHTS
+        return production, ready
+    materials = []
+    for item in nonempty_list(raw["materials"], "materials"):
+        kind = allowed(item["kind"], {"screen_recording", "chart", "original_text", "visual"}, "material kind")
+        details = material_fields(item)
+        source_url = item.get("source_url")
+        if source_url:
+            source_url = topic_url(source_url)
+        materials.append(dict(
+            kind=kind, description=required_text(item["description"], "material description"),
+            essential=bool_field(item["essential"], "essential material"),
+            availability=allowed(item["availability"], {"ready", "planned", "missing"}, "material availability"),
+            source_url=source_url, **details,
+        ))
+    required = [item for item in materials if item["essential"]]
+    if not required:
+        raise ValueError("B production must identify essential materials")
+    ready = all(
+        item["rights"] in ALLOW_RIGHTS and (
+            item["availability"] == "ready" or item["availability"] == "planned" and item["rights"] == "owned"
+        )
+        for item in required
+    )
+    production.update(script_direction=required_text(raw["script_direction"], "script_direction"), materials=materials)
+    return production, ready
+
+
+def score_for(scores):
+    if set(scores) != set(WEIGHTS) or any(type(val) is not int or not 0 <= val <= 100 for val in scores.values()):
+        raise ValueError("Expected one integer 0–100 per scoring dimension")
+    return round(sum(scores[key] * weight for key, weight in WEIGHTS.items()) / 100, 2)
+
+
+def prepare_topic(root, run_id, raw, created_date):
+    slug = required_text(raw["slug"], "topic slug")
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
+        raise ValueError("Topic slug must use lowercase ASCII letters, digits, and hyphens")
+    line = allowed(raw["line"], {"A", "B"}, "production line")
+    event_url = topic_url(raw["event_url"])
+    evidence, claims, gaps = facts_for(raw, event_url)
+    production, materials_ready = production_for(root, line, raw["production"])
+    verify = raw["verification_notes"]
+    if not isinstance(verify, list):
+        raise ValueError("verification_notes must be an array")
+    verify = [required_text(note, "verification note") for note in verify]
+    major_gap = bool_field(raw["major_fact_gap"], "major_fact_gap")
+    if major_gap and not verify:
+        raise ValueError("A major fact gap needs a verification note")
+    state = "needs_verification" if gaps or major_gap else READY if materials_ready else "needs_material"
+    original_view = required_text(raw["original_view"], "original_view")
+    return dict(
+        topic_id=f"{run_id}:{slug}", slug=slug, created_date=created_date, status="candidate",
+        title=required_text(raw["title"], "title"), theme=required_text(raw["theme"], "theme"),
+        event_url=event_url, line=line, evidence=evidence, claims=claims,
+        audience_value=required_text(raw["audience_value"], "audience_value"), original_view=original_view,
+        hook=required_text(raw["hook"], "hook"), recommendation=required_text(raw["recommendation"], "recommendation"),
+        scores=raw["scores"], score=score_for(raw["scores"]),
+        score_basis=required_text(raw["score_basis"], "score_basis"),
+        production_state=state, materials_ready=materials_ready, production=production,
+        verification_notes=verify, blocking_facts=gaps, major_fact_gap=major_gap,
+        new_development=required_text(raw["new_development"], "new_development") if raw.get("new_development") else None,
+        handoff={
+            "line": line, "ready_to_prepare": state == READY, "topic_id": f"{run_id}:{slug}",
+            "source_urls": [item["url"] for item in evidence], "original_view": original_view,
+            "production": production,
+        },
+    )
+
+
+def match_topic(topic, prior):
+    if url_key(topic["event_url"]) == url_key(prior["event_url"]):
+        return "event_url"
+    for field in ("title", "theme"):
+        left, right = (title_key(node[field]) for node in (topic, prior))
+        if left and right and (
+            left == right or min(len(left), len(right)) >= 6 and SequenceMatcher(None, left, right).ratio() >= 0.84
+        ):
+            return field
+    return None
+
+
+def rank_topics(topics, history, max_topics):
+    kept, duplicates = [], []
+    for topic in sorted(topics, key=lambda row: (-row["score"], row["slug"])):
+        current = [(prior, match_topic(topic, prior)) for prior in kept]
+        previous = [(prior, match_topic(topic, prior)) for prior in history]
+        hits = [(prior, reason) for prior, reason in current if reason]
+        historical = [(prior, reason) for prior, reason in previous if reason]
+        if hits or historical and not topic["new_development"]:
+            prior, reason = (hits or historical)[0]
+            duplicates.append(dict(topic_id=topic["topic_id"], matched_topic_id=prior["topic_id"], field=reason))
+            continue
+        if historical:
+            topic["revisits"] = [prior["topic_id"] for prior, _ in historical]
+        if len(kept) < max_topics:
+            topic["rank"] = len(kept) + 1
+            kept.append(topic)
+    return kept, duplicates
+
+
+def md(value):
+    return str(value).replace("\\", "\\\\").replace("[", "\\[").replace("]", "\\]").replace("\n", " ")
+
+
+def link(url, label):
+    return f"[{md(label)}](<{url}>)"
+
+
+def daily_brief(result, collected):
+    topic_list = result["topics"]
+    labels = {"ready": "可准备制作", "needs_verification": "待核实", "needs_material": "需补素材或授权"}
+    lines = [f"# Kai 每日选题｜{result['research_date']}", "",
+             f"研究范围 {collected['hours']} 小时（北京时间）。共入选 {len(topic_list)} 个候选。"]
+    failures = [source["name"] for source in collected["sources"] if source["status"] in {"failed", "partial"}]
+    if failures:
+        lines += ["", "本次采集受限：" + "、".join(failures) + "。"]
+    if result["recommended_topic_id"]:
+        top = next(topic for topic in topic_list if topic["topic_id"] == result["recommended_topic_id"])
+        lines += ["", f"**优先制作：{md(top['title'])}**。{md(top['recommendation'])}"]
+    else:
+        lines += ["", "本次没有可直接准备制作的选题。"]
+    if result["note"]:
+        lines += ["", md(result["note"])]
+    for topic in topic_list:
+        plan = topic["production"]
+        lines += ["", f"## {topic['rank']}. {md(topic['title'])}", "",
+                  f"**{topic['score']:.2f} 分 · {topic['line']} 线 · {labels[topic['production_state']]}**"
+                  f" · {md(plan['format'])} · {plan['duration_seconds']} 秒",
+                  f"编号 `{topic['topic_id']}`", ""]
+        by_url = {source["url"]: source for source in topic["evidence"]}
+        for claim in topic["claims"]:
+            sources = " · ".join(
+                link(url, f"{by_url[url]['source']} {by_url[url]['published_at'] or '日期未载'}"
+                     + ("，正文未读" if by_url[url]["access"] == "link_only" else ""))
+                for url in claim["urls"]
+            )
+            lines.append(f"- {CLAIM_LABELS[claim['role']]}｜{md(claim['statement'])}" + (f" {sources}" if sources else ""))
+        lines += ["", f"- **受众价值**　{md(topic['audience_value'])}",
+                  f"- **Kai 观点**　{md(topic['original_view'])}", f"- **开场**　{md(topic['hook'])}",
+                  f"- **推荐理由**　{md(topic['recommendation'])}"]
+        if topic["line"] == "A":
+            footage = plan["interview"]
+            lines += [f"- **素材**　{md(footage['planned_segment'])}。权利 {footage['rights']}，"
+                      f"本地合法素材{'已确认' if footage['has_legal_local_material'] else '待补充'}。"
+                      f"{md(footage['rights_note'])} {link(footage['media_url'], '片源')}"]
+        else:
+            materials = "；".join(
+                f"{md(item['description'])}（{'必要' if item['essential'] else '可选'}，"
+                f"{item['rights']} / {item['availability']}）" for item in plan["materials"]
+            )
+            lines += [f"- **脚本**　{md(plan['script_direction'])}", f"- **素材**　{materials}"]
+        lines += [f"- **制作**　{md(plan['difficulty'])}。{md(plan['risk'])}"]
+        notes = topic["verification_notes"] + topic["blocking_facts"]
+        if notes:
+            lines += ["- **待核实**　" + "；".join(map(md, notes))]
+        if topic.get("revisits"):
+            lines += ["- **重新纳入的理由**　" + md(topic["new_development"])]
+    lines += ["", "评分用于本次选题比较。制作建议以事实与素材准入结果为准。", ""]
+    return "\n".join(lines)
+
+
+def gemini_prompt(result):
+    lines = ["# Gemini 手动复核", "",
+             "请核对下列公开选题是否遗漏关键来源、条件或反例。逐条给出建议和原始公开链接，"
+             "区分当事方说法与已证实事实。无法打开原文时注明。建议将由 Kai 另行核实。", ""]
+    for topic in result["topics"]:
+        lines.extend([f"## {md(topic['title'])}", md(topic["original_view"]),
+                      *(f"- {link(item['url'], item['title'])}" for item in topic["evidence"]), ""])
+    return "\n".join(lines)
+
+===== config/research-sources.json =====
+[
+  {
+    "source_id": "aihot",
+    "name": "AIHOT",
+    "url": "https://aihot.news/",
+    "category": "AI 热点聚合",
+    "language": "zh",
+    "method": "aihot_api_v1",
+    "access_status": "docs_verified",
+    "verified_on": "2026-11-26",
+    "first_hand": false,
+    "authorization_status": "pending",
+    "enabled": false,
+    "priority_after_authorization": "aggregate_discovery_first",
+    "usage_limits": "外部商业用途须先取得书面授权；本阶段禁用采集及导入聚合数据。第三方权利不随聚合转移。",
+    "documentation": ["https://aihot.news/agent", "https://aihot.news/agent?tab=api", "https://aihot.news/openapi-v1.json", "https://aihot.news/terms"],
+    "planned_endpoints": ["/api/v1/items?mode=selected&limit=20", "/api/v1/hot-topics", "/api/v1/stories/{publicId}", "/api/v1/dailies/latest"]
+  },
+  {
+    "source_id": "openai",
+    "name": "OpenAI",
+    "url": "https://openai.com/news/rss.xml",
+    "category": "AI 前沿与产品",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": true,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "google-ai",
+    "name": "Google 官方 AI 博客",
+    "url": "https://blog.google/innovation-and-ai/technology/ai/rss/",
+    "category": "AI 前沿与应用",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": true,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "microsoft-research",
+    "name": "Microsoft Research",
+    "url": "https://www.microsoft.com/en-us/research/feed/",
+    "category": "AI 研究与实践",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": true,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "nvidia",
+    "name": "NVIDIA Blog",
+    "url": "https://blogs.nvidia.com/feed/",
+    "category": "AI 基础设施与应用",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": true,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "techcrunch-ai",
+    "name": "TechCrunch AI",
+    "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "category": "科技与商业",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": false,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "github-blog",
+    "name": "GitHub Blog",
+    "url": "https://github.blog/feed/",
+    "category": "开发实践与产品",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": true,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "hacker-news",
+    "name": "Hacker News",
+    "url": "https://hacker-news.firebaseio.com/v0/topstories.json",
+    "category": "开发者社区",
+    "language": "en",
+    "method": "hn_api",
+    "access_status": "verified",
+    "first_hand": false,
+    "usage_limits": "只取公开故事元数据和互动信号；发帖时间用于社区条目，外链原文另查。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "lex-fridman",
+    "name": "Lex Fridman Podcast",
+    "url": "https://lexfridman.com/feed/podcast/",
+    "category": "长访谈",
+    "language": "en",
+    "method": "rss",
+    "access_status": "verified",
+    "first_hand": true,
+    "usage_limits": "只收公开订阅元数据和短摘要；正文、图像、音视频的转载或二次制作权需另行确认。",
+    "verified_on": "2026-11-26"
+  },
+  {
+    "source_id": "deepmind",
+    "name": "Google DeepMind",
+    "url": "https://deepmind.google/blog/rss.xml",
+    "category": "AI 研究",
+    "language": "en",
+    "method": "rss",
+    "access_status": "unavailable",
+    "first_hand": true,
+    "usage_limits": "可通过搜索逐篇核查公开页面；二次制作权需单独确认。",
+    "verified_on": "2026-11-26",
+    "access_note": "本地订阅入口 TLS 握手超时。可逐篇查阅 Google 官方页。"
+  },
+  {
+    "source_id": "hugging-face",
+    "name": "Hugging Face Blog",
+    "url": "https://huggingface.co/blog/feed.xml",
+    "category": "开源模型与实践",
+    "language": "en",
+    "method": "rss",
+    "access_status": "unavailable",
+    "first_hand": true,
+    "usage_limits": "可通过搜索逐篇核查公开页面；二次制作权需单独确认。",
+    "verified_on": "2026-11-26",
+    "access_note": "本地订阅入口请求超时。"
+  },
+  {
+    "source_id": "36kr",
+    "name": "36氪",
+    "url": "https://36kr.com/feed",
+    "category": "科技与商业",
+    "language": "zh",
+    "method": "rss",
+    "access_status": "unavailable",
+    "first_hand": false,
+    "usage_limits": "可通过搜索逐篇核查公开页面；二次制作权需单独确认。",
+    "verified_on": "2026-11-26",
+    "access_note": "候选入口返回内容无法解析为订阅 XML。"
+  }
+]
+
+===== .agents/skills/kai-research/SKILL.md =====
+---
+name: kai-research
+description: 为 Kai Content Agent 查找今日或指定时段值得制作的 AI、商业、创业或生产力选题。用于热点研究、事实核查、每日选题报告和 A/B 线研究交接。
+---
+
+在仓库根目录工作，读取 `config/kai-content.json` 的受众、内容偏好和时长。使用现有 Python 环境。
+
+1. 检查本会话是否具备公开搜索或读取能力。以北京时间为准，取一个新的任务名，如 `p5-2026-11-26`。执行 `.\.venv\Scripts\python.exe -X utf8 src/research.py collect <任务名>`，默认近 72 小时，`--hours 168` 取近 7 天。
+2. 如已有手工来源，用 `--manual <文件.json>` 一并导入。每条含 `title`、`source`、`url`、`published_at`（ISO 日期、带时区时间戳或 null）、`category`、`summary`、`first_hand`、`access`（确认读到正文用 `opened`，否则 `link_only`）和 `supplied_by`（`user` 或 `codex`）。联网不可用时使用 `--offline --manual` 并在结论注明。AIHOT 目前待书面授权，采集和导入均停用。
+3. 读 `workspace/<任务名>/sources.json`，留意实际源状态、同一条目出现的来源、Hacker News 互动和发布时间。可另查公开来源并把证据直接加入草稿。来源数、热度与转述仅作发现线索。用 `src/research.py history` 查看是否已有同一事件。重要事实追至公告、原始论文、产品文档或完整访谈，给每条事实对应证据。有争议时找独立证据；同一机构的公告与论文不可算独立交叉验证。无法访问正文的链接不得用于确认事实，关键缺口应列为待核实。
+4. 写 `workspace/<任务名>/research-draft.json`，UTF-8。推荐 3–5 条，高价值不足时少选或填空数组。按“发生了什么、对中文普通用户的价值、Kai 原创观点、表现形式和合法素材”判断，通过同一次研究综合排序。下列字段交给 Python 做确定性校验、去重、加权排序、准入判断和生成报告。
+5. 依次运行 `src/research.py finalize <任务名>` 和 `src/research.py validate <任务名>`。发布本地报告路径并说明首选、生产线和素材状态。选题仅记为 `candidate`，后续真实进度可用 `history <topic_id> <状态> --note <进度依据>` 更新。被历史去重的选题只有在出现实质新增信息且能用证据解释时才重提。
+6. 用户需要第二意见时运行 `src/research.py gemini-prompt <任务名>`，仅生成公开资料提示词供用户手动使用。收到建议后核实对应原始来源。
+
+## 草稿字段
+
+根对象为 `{"note":"本期编辑说明，零候选时必填","topics":[]}`。每条候选包含以下字段。
+
+| 字段 | 取值 |
+| --- | --- |
+| `slug`, `title`, `theme` | ASCII 小写连字符 ID、中文推荐标题、用于跨日去重的具体事件主题 |
+| `event_url`, `line` | 原始事件链接和 `A` 或 `B` |
+| `evidence` | 每条含 `url`、`title`、`source`、`kind`（`primary/media/community/other`）、`access`（`opened/link_only`）和 `published_at`（未知为 null） |
+| `claims` | 每条含 `statement`、`role`（`confirmed/party_statement/media_report/unverified/kai_analysis`）、`core` 布尔值、`urls`（引用 `evidence`）。至少一条为核心事实 |
+| `audience_value`, `original_view`, `hook`, `recommendation` | 受众收益、独立观点、开场、推荐理由 |
+| `scores`, `score_basis` | 七维 0–100 整数及理由 |
+| `major_fact_gap`, `verification_notes` | 布尔值及待核实事项数组。存在关键缺口时注明 |
+| `production` | 通用字段 `format`、`duration_seconds`（整数）、`difficulty`、`risk`，附下列路线字段 |
+| `new_development` | 可选，解释本次实质新进展及新证据的价值 |
+
+分数键为 `information_value` 25%、`audience_fit` 25%、`timeliness` 15%、`originality` 15%、`sharing_potential` 10%、`business_value` 5%、`production_feasibility` 5%。结合明确的受众、独立角度、证据和素材给分。事实和版权有独立准入条件。
+
+- A 线 `production.interview` 包含 `interview_url`、`people`、`context`、`media_url`、`planned_segment`、`rights`、`rights_note`、`ai_label`、`has_legal_local_material`（布尔值）和 `local_path`（可空）。验收依赖已确认的用户授权或自有权益及实际本地文件。公网可看、但用户未确认授权时填 `unknown` 或 `pending`，不下载、不送入 P1。
+- B 线 `production` 包含 `script_direction` 和 `materials` 数组。每项含 `kind`（`screen_recording/chart/original_text/visual`）、`description`、`essential`（布尔值）、`availability`（`ready/planned/missing`）、`rights`、`rights_note`、`ai_label` 和可选 `source_url`。必要素材需已可用且自有或有授权，或可用自有内容创制。不能作为必要素材的截图、视频或厂商图可从方案移除或记为可选。
+- 两条线的 `rights` 可为 `owned/authorized/unknown/pending/denied`，`ai_label` 可为 `required/not-required/unknown`。Python 负责生成 `handoff`，仅输出研究交接数据。

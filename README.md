@@ -1,6 +1,6 @@
 # Kai Content Agent
 
-Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染及 P4 品牌视觉。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
+Kai 的本地短视频生产工具。A 线处理已授权访谈素材并制作解读短视频。B 线面向原创 AI 科技、商业认知、个人成长和生产力、工具实测与技术项目。当前已实现 P1 本地转写、P2 内容分析与制作方案、P3 视频渲染、P4 品牌视觉及 P5 日常选题研究。先读 [项目规则](AGENTS.md) 和 [当前状态](STATUS.md)。
 
 ## Windows 环境
 
@@ -114,3 +114,29 @@ ffmpeg -v error -xerror -nostdin -i 'output/kai-next/video.mp4' -map 0:v:0 -map 
 | `frame-*.png` | 正片抽帧，或在静态模式下用同一布局生成的预览 |
 
 原始媒体 SHA-256 从本次实际渲染输入计算。人工审核时播放视频并检查原意、画面、字幕、原创观点及 AI 标识。P4 运行证据见 [P4 审核文本](P4-REVIEW.txt)。
+
+## 每日选题与素材研究
+
+在以仓库为工作目录的 Codex 会话中发送「使用 $kai-research，寻找今天最值得 Kai 账号制作的选题」。Codex 复用账号定位，追溯一手证据、判断中文受众价值并给出原创切入点。Python 用标准库采集公开订阅和社区元数据，并完成去重、加权排序、制作准入和历史记录。草稿字段见 [kai-research Skill](.agents/skills/kai-research/SKILL.md)。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 src/research.py collect kai-next --hours 72
+# Codex 核查来源后写入 workspace/kai-next/research-draft.json
+.\.venv\Scripts\python.exe -X utf8 src/research.py finalize kai-next
+.\.venv\Scripts\python.exe -X utf8 src/research.py validate kai-next
+.\.venv\Scripts\python.exe -X utf8 src/research.py history
+```
+
+- 任务目录名须唯一。默认查看近 72 小时，近 7 天用 `--hours 168`。发布日仅有日期时保留日期精度。日期未知的条目可以留作线索，社区提交时间只代表社区记录。
+- 可用 `--manual <链接清单.json>` 补充用户或 Codex 提供的公开链接和短摘要，纯手工研究加 `--offline`。正文是否读到、发生超时及未接通入口会分别记录。首次试点的公开来源与权限见 [信息源注册表](config/research-sources.json)。
+- AIHOT 将作为未来优先的热点聚合入口，当前为 `pending` 且禁用采集及聚合数据导入。授权后按新版 REST 文档确认精选约 20 条、热点榜前十和个别事件详情的访问条件。 [API 文档](https://aihot.news/agent?tab=api) · [条款](https://aihot.news/terms)
+- 历史记录写入 `workspace/research-history.jsonl`。真实进度发生后用 `history <topic_id> <状态> --note <依据>` 更新。可选 `gemini-prompt <任务名>` 在本地生成提示词，用户可以手动提交，反馈仍须核查原始来源。
+
+| 文件 | 内容 |
+| --- | --- |
+| `sources.json` | 来源状态、采集方式、实际窗口、短摘要、社区信号和去重记录 |
+| `research-draft.json` | Codex 的证据核查、选题理由、评分依据及制作路线草稿 |
+| `topics.json` | 计算后的分数和排序、候选状态、证据、素材权利及 A/B 研究交接 |
+| `daily-brief.md` | 中文运营简报及推荐首选 |
+
+制作准入独立于分数。A 线须已有权利确认且本地文件可用。B 线可用原创图表、文字或其他合法素材准备制作。选题记录由候选开始，P5 仅交付研究和结构化方案。实际验收见 [P5 审核文本](P5-REVIEW.txt)。
